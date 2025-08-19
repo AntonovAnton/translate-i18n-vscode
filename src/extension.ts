@@ -4,7 +4,7 @@ import * as path from "path";
 
 // API Types based on the OpenAPI specification
 interface TranslationRequest {
-  sourceStrings: Record<string, any>;
+  sourceStrings: string | Record<string, any>;
   targetLanguageCode: string;
   useContractions?: boolean;
   useShortening?: boolean;
@@ -104,7 +104,7 @@ class L10nTranslationService {
   }
 
   async translateJson(
-    sourceStrings: Record<string, any>,
+    sourceStrings: string | Record<string, any>,
     targetLanguageCode: string
   ): Promise<TranslationResult> {
     const apiKey = await this.getApiKey();
@@ -198,7 +198,7 @@ class L10nTranslationService {
 enum ProjectStructureType {
   FolderBased = "folder",
   FileBased = "file",
-  Unknown = "unknown"
+  Unknown = "unknown",
 }
 
 interface ProjectStructureInfo {
@@ -209,33 +209,41 @@ interface ProjectStructureInfo {
 
 class LanguageDetector {
   private readonly languageCodeRegex =
-    /^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/;
+    /^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/i;
 
-  detectLanguagesFromProject(): string[] {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
-      return [];
-    }
-
+  detectLanguagesFromProject(sourceFilePath: string): string[] {
     const languageCodes = new Set<string>();
+    const sourceDir = path.dirname(sourceFilePath);
+    const parentDir = path.dirname(sourceDir);
 
-    for (const folder of workspaceFolders) {
-      this.scanDirectory(folder.uri.fsPath, languageCodes);
+    // Detect the source language to exclude it
+    const structureInfo = this.detectProjectStructure(sourceFilePath);
+    const sourceLanguage = structureInfo.sourceLanguage;
+
+    // Scan the parent directory for language codes
+    this.scanDirectory(parentDir, languageCodes);
+
+    // Remove source language from the set if it exists
+    if (sourceLanguage) {
+      languageCodes.delete(sourceLanguage);
     }
 
-    return Array.from(languageCodes).sort();
+    // Return sorted list of unique language codes
+    return Array.from(languageCodes).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
   }
 
   detectProjectStructure(sourceFilePath: string): ProjectStructureInfo {
     const sourceDir = path.dirname(sourceFilePath);
     const sourceFileName = path.basename(sourceFilePath, ".json");
-    
+
     // Check if the source file name is a language code (file-based structure)
     if (this.languageCodeRegex.test(sourceFileName)) {
       return {
         type: ProjectStructureType.FileBased,
         basePath: sourceDir,
-        sourceLanguage: sourceFileName
+        sourceLanguage: sourceFileName,
       };
     }
 
@@ -245,17 +253,20 @@ class LanguageDetector {
       return {
         type: ProjectStructureType.FolderBased,
         basePath: path.dirname(sourceDir),
-        sourceLanguage: parentDirName
+        sourceLanguage: parentDirName,
       };
     }
 
     return {
       type: ProjectStructureType.Unknown,
-      basePath: sourceDir
+      basePath: sourceDir,
     };
   }
 
-  generateTargetFilePath(sourceFilePath: string, targetLanguage: string): string {
+  generateTargetFilePath(
+    sourceFilePath: string,
+    targetLanguage: string
+  ): string {
     const structureInfo = this.detectProjectStructure(sourceFilePath);
     const sourceFileName = path.basename(sourceFilePath, ".json");
 
@@ -266,7 +277,7 @@ class LanguageDetector {
         if (!fs.existsSync(targetDir)) {
           fs.mkdirSync(targetDir, { recursive: true });
         }
-        
+
         // Use the same file name as source
         const targetFilePath = path.join(targetDir, `${sourceFileName}.json`);
         return this.getUniqueFilePath(targetFilePath);
@@ -274,14 +285,20 @@ class LanguageDetector {
 
       case ProjectStructureType.FileBased: {
         // Save in the same directory with target language as filename
-        const targetFilePath = path.join(structureInfo.basePath, `${targetLanguage}.json`);
+        const targetFilePath = path.join(
+          structureInfo.basePath,
+          `${targetLanguage}.json`
+        );
         return this.getUniqueFilePath(targetFilePath);
       }
 
       default: {
         // Unknown structure - fallback to current behavior
         const sourceDir = path.dirname(sourceFilePath);
-        const targetFilePath = path.join(sourceDir, `${sourceFileName}.${targetLanguage}.json`);
+        const targetFilePath = path.join(
+          sourceDir,
+          `${sourceFileName}.${targetLanguage}.json`
+        );
         return this.getUniqueFilePath(targetFilePath);
       }
     }
@@ -311,6 +328,29 @@ class LanguageDetector {
     return !!code && this.languageCodeRegex.test(code);
   }
 
+  normalizeLanguageCode(code: string): string {
+    // Normalize to proper BCP-47 format: language-Script-Region
+    const match = code.match(this.languageCodeRegex);
+    if (!match || !match.groups) {
+      return code;
+    }
+
+    const { language, script, region } = match.groups;
+
+    let normalized = language.toLowerCase();
+    if (script) {
+      normalized += `-${
+        script.charAt(0).toUpperCase() + script.slice(1).toLowerCase()
+      }`;
+    }
+    if (region) {
+      // Region codes can be either 2-3 letters (uppercase) or 3 digits
+      normalized += `-${/^\d+$/.test(region) ? region : region.toUpperCase()}`;
+    }
+
+    return normalized;
+  }
+
   private scanDirectory(
     dirPath: string,
     languageCodes: Set<string>,
@@ -326,19 +366,17 @@ class LanguageDetector {
       for (const entry of entries) {
         const entryPath = path.join(dirPath, entry.name);
 
-        if (entry.isDirectory() && entry.name !== "node_modules") {
+        if (entry.isDirectory()) {
+          // Check directory name for language codes
+          if (this.languageCodeRegex.test(entry.name)) {
+            languageCodes.add(entry.name);
+          }
           this.scanDirectory(entryPath, languageCodes, depth + 1);
         } else if (entry.isFile() && entry.name.endsWith(".json")) {
           // Check file names for language codes
           const baseName = path.basename(entry.name, ".json");
           if (this.languageCodeRegex.test(baseName)) {
             languageCodes.add(baseName);
-          } else {
-            // Check folder name for language codes
-            const folderName = path.basename(dirPath);
-            if (this.languageCodeRegex.test(folderName)) {
-              languageCodes.add(folderName);
-            }
           }
         }
       }
@@ -427,21 +465,10 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        // Read and parse the JSON file
-        const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
-        let sourceStrings: Record<string, any>;
-
-        try {
-          sourceStrings = JSON.parse(fileContent);
-        } catch (error) {
-          vscode.window.showErrorMessage(
-            "Invalid JSON file. Please check the file format."
-          );
-          return;
-        }
-
         // Detect available languages from project structure
-        const detectedLanguages = languageDetector.detectLanguagesFromProject();
+        const detectedLanguages = languageDetector.detectLanguagesFromProject(
+          fileUri.fsPath
+        );
 
         // Let user choose target language
         let targetLanguage: string | undefined;
@@ -538,6 +565,13 @@ export function activate(context: vscode.ExtensionContext) {
           }
         }
 
+        // Read JSON file
+        const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
+
+        // Normalize target language for API call
+        const normalizedTargetLanguage =
+          languageDetector.normalizeLanguageCode(targetLanguage);
+
         // Show progress
         await vscode.window.withProgress(
           {
@@ -550,8 +584,8 @@ export function activate(context: vscode.ExtensionContext) {
               progress.report({ message: "Sending translation request..." });
 
               const result = await translationService.translateJson(
-                sourceStrings,
-                targetLanguage
+                fileContent,
+                normalizedTargetLanguage // Use normalized version for API
               );
 
               // Handle finish reasons

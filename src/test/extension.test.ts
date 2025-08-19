@@ -17,7 +17,7 @@ suite('Extension Test Suite', () => {
 		// Mock LanguageDetector for testing
 		class TestLanguageDetector {
 			private readonly languageCodeRegex =
-				/^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/;
+				/^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/i;
 
 			detectProjectStructure(sourceFilePath: string) {
 				const sourceDir = path.dirname(sourceFilePath);
