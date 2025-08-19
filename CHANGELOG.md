@@ -13,7 +13,7 @@ All notable changes to the "l10n.translate-i18n" extension will be documented in
   - Recognizes common i18n directory names (`locales`, `i18n`, `translations`, `lang`, `languages`)
 - 🌐 **Language Prediction**: Search and predict language codes using l10n.dev API
 - ⚙️ **Translation Options**: Configure contractions, and shortening
-- 📁 **Context Menu Integration**: "Translate to..." option for JSON files in Explorer and Editor
+- 📁 **Context Menu Integration**: "Translate JSON to..." option for JSON files in Explorer and Editor
 - 📊 **Usage Tracking**: Shows character usage and translation details
 - 🚨 **Error Handling**: Comprehensive error messages for different scenarios
 - 💰 **Free Trial Promotion**: Informs new users about 30,000 free characters
@@ -22,7 +22,7 @@ All notable changes to the "l10n.translate-i18n" extension will be documented in
 - **Commands**:
   - `l10n.dev: Set API Key` - Securely configure API key
   - `l10n.dev: Configure Translation Options` - Open extension settings
-  - `l10n.dev: Translate to...` - Translate JSON files
+  - `l10n.dev: Translate JSON to...` - Translate JSON files
 
 - **Configuration Options**:
   - `l10n.useContractions` - Use grammar contractions (default: true)

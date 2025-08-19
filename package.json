@@ -4,18 +4,27 @@
   "description": "Translate i18n JSON files with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
   "version": "0.0.1",
   "publisher": "l10n-dev",
+  "license": "AGPL-3.0-only",
+  "icon": "images/icon.png",
+  "author": {
+    "name": "Anton Antonov",
+    "email": "support@l10n.dev",
+    "url": "https://l10n.dev"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AntonovAnton/l10n-vscode.git"
+    "url": "https://github.com/AntonovAnton/translate-i18n-vscode.git"
   },
   "homepage": "https://l10n.dev",
   "bugs": {
-    "url": "https://github.com/AntonovAnton/l10n-vscode/issues"
+    "url": "https://github.com/AntonovAnton/translate-i18n-vscode/issues"
   },
   "keywords": [
     "translation",
     "i18n",
+    "i18next",
     "internationalization",
+    "auto-translate-json",
     "localization",
     "l10n",
     "ai",
@@ -26,6 +35,8 @@
     "vscode": "^1.102.0"
   },
   "categories": [
+    "Formatters",
+    "AI",
     "Other"
   ],
   "activationEvents": [
@@ -36,7 +47,7 @@
     "commands": [
       {
         "command": "l10n.translate-i18n.translate",
-        "title": "Translate to...",
+        "title": "Translate JSON to...",
         "category": "l10n.dev"
       },
       {

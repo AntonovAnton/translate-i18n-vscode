@@ -26,7 +26,7 @@ AI-powered localization for VS Code. Translate i18n JSON files directly in your 
 
 ### 3. Translate Your Files
 1. Right-click on any JSON file in the Explorer or Editor
-2. Select `Translate to...`
+2. Select `Translate JSON to...`
 3. Choose your target language (detected automatically or search manually)
 4. Wait for translation to complete
 5. The translated file will be saved with the target language code
@@ -76,7 +76,7 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 
 - `l10n.dev: Set API Key` - Configure your API key securely
 - `l10n.dev: Configure Translation Options` - Open extension settings
-- `l10n.dev: Translate to...` - Translate the current JSON file
+- `l10n.dev: Translate JSON to...` - Translate the current JSON file
 
 ## Language Support
 
