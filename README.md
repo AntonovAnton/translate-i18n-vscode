@@ -33,7 +33,7 @@ AI-powered localization for VS Code. Translate i18n JSON files directly in your 
 
 ## Supported Project Structures
 
-The extension automatically detects target languages from common i18n project structures:
+The extension automatically detects target languages from common i18n project structures and saves translated files accordingly:
 
 ### Folder-based Structure
 ```
@@ -46,6 +46,12 @@ locales/
 └── de/
 ```
 
+**How it works:**
+- **Detection**: Language code is identified from the folder name (e.g., `en/`, `es/`, `fr/`)
+- **File Saving**: Creates the target language folder if it doesn't exist and saves the file with the same name as the source file
+- **Example**: Translating `locales/en/common.json` to Spanish → `locales/es/common.json`
+- **Conflict Resolution**: If the target file already exists, adds a copy number (e.g., `common (1).json`)
+
 ### File-based Structure
 ```
 i18n/
@@ -57,13 +63,14 @@ i18n/
 └── zh-Hans-CN.json
 ```
 
-### Mixed Structure
-```
-translations/
-├── en-latn-us.json
-├── es-ES.json
-└── fr-FR.json
-```
+**How it works:**
+- **Detection**: Language code is identified from the filename (e.g., `en.json`, `es.json`, `fr.json`)
+- **File Saving**: Saves the translated file using the target language code as the filename in the same folder
+- **Example**: Translating `i18n/en.json` to Spanish → `i18n/es.json`
+- **Conflict Resolution**: If the target file already exists, adds a copy number (e.g., `es (1).json`)
+
+### Unknown Structure Fallback
+For projects that don't match the above patterns, the extension falls back to saving files with the format: `{originalname}.{languagecode}.json` in the same directory as the source file.
 
 ## Configuration Options
 

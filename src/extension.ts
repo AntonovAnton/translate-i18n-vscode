@@ -195,6 +195,18 @@ class L10nTranslationService {
   }
 }
 
+enum ProjectStructureType {
+  FolderBased = "folder",
+  FileBased = "file",
+  Unknown = "unknown"
+}
+
+interface ProjectStructureInfo {
+  type: ProjectStructureType;
+  basePath: string;
+  sourceLanguage?: string;
+}
+
 class LanguageDetector {
   private readonly languageCodeRegex =
     /^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/;
@@ -212,6 +224,87 @@ class LanguageDetector {
     }
 
     return Array.from(languageCodes).sort();
+  }
+
+  detectProjectStructure(sourceFilePath: string): ProjectStructureInfo {
+    const sourceDir = path.dirname(sourceFilePath);
+    const sourceFileName = path.basename(sourceFilePath, ".json");
+    
+    // Check if the source file name is a language code (file-based structure)
+    if (this.languageCodeRegex.test(sourceFileName)) {
+      return {
+        type: ProjectStructureType.FileBased,
+        basePath: sourceDir,
+        sourceLanguage: sourceFileName
+      };
+    }
+
+    // Check if the parent directory is a language code (folder-based structure)
+    const parentDirName = path.basename(sourceDir);
+    if (this.languageCodeRegex.test(parentDirName)) {
+      return {
+        type: ProjectStructureType.FolderBased,
+        basePath: path.dirname(sourceDir),
+        sourceLanguage: parentDirName
+      };
+    }
+
+    return {
+      type: ProjectStructureType.Unknown,
+      basePath: sourceDir
+    };
+  }
+
+  generateTargetFilePath(sourceFilePath: string, targetLanguage: string): string {
+    const structureInfo = this.detectProjectStructure(sourceFilePath);
+    const sourceFileName = path.basename(sourceFilePath, ".json");
+
+    switch (structureInfo.type) {
+      case ProjectStructureType.FolderBased: {
+        // Create target language folder if it doesn't exist
+        const targetDir = path.join(structureInfo.basePath, targetLanguage);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+        
+        // Use the same file name as source
+        const targetFilePath = path.join(targetDir, `${sourceFileName}.json`);
+        return this.getUniqueFilePath(targetFilePath);
+      }
+
+      case ProjectStructureType.FileBased: {
+        // Save in the same directory with target language as filename
+        const targetFilePath = path.join(structureInfo.basePath, `${targetLanguage}.json`);
+        return this.getUniqueFilePath(targetFilePath);
+      }
+
+      default: {
+        // Unknown structure - fallback to current behavior
+        const sourceDir = path.dirname(sourceFilePath);
+        const targetFilePath = path.join(sourceDir, `${sourceFileName}.${targetLanguage}.json`);
+        return this.getUniqueFilePath(targetFilePath);
+      }
+    }
+  }
+
+  private getUniqueFilePath(filePath: string): string {
+    if (!fs.existsSync(filePath)) {
+      return filePath;
+    }
+
+    const dir = path.dirname(filePath);
+    const ext = path.extname(filePath);
+    const baseName = path.basename(filePath, ext);
+
+    let counter = 1;
+    let uniquePath: string;
+
+    do {
+      uniquePath = path.join(dir, `${baseName} (${counter})${ext}`);
+      counter++;
+    } while (fs.existsSync(uniquePath));
+
+    return uniquePath;
   }
 
   validateLanguageCode(code: string): boolean {
@@ -496,12 +589,10 @@ export function activate(context: vscode.ExtensionContext) {
 
               progress.report({ message: "Saving translated file..." });
 
-              // Generate output file path
-              const inputDir = path.dirname(fileUri.fsPath);
-              const inputName = path.basename(fileUri.fsPath, ".json");
-              const outputPath = path.join(
-                inputDir,
-                `${inputName}.${targetLanguage}.json`
+              // Generate output file path using the new structure detection logic
+              const outputPath = languageDetector.generateTargetFilePath(
+                fileUri.fsPath,
+                targetLanguage
               );
 
               // Save translated file
