@@ -12,7 +12,7 @@ All notable changes to the "l10n.translate-i18n" extension will be documented in
   - Supports file-based structures (`en.json`, `fr.json`, `en-US.json`)
   - Recognizes common i18n directory names (`locales`, `i18n`, `translations`, `lang`, `languages`)
 - 🌐 **Language Prediction**: Search and predict language codes using l10n.dev API
-- ⚙️ **Translation Options**: Configure contractions, shortening, and custom terminology
+- ⚙️ **Translation Options**: Configure contractions, and shortening
 - 📁 **Context Menu Integration**: "Translate to..." option for JSON files in Explorer and Editor
 - 📊 **Usage Tracking**: Shows character usage and translation details
 - 🚨 **Error Handling**: Comprehensive error messages for different scenarios
@@ -27,7 +27,6 @@ All notable changes to the "l10n.translate-i18n" extension will be documented in
 - **Configuration Options**:
   - `l10n.useContractions` - Use grammar contractions (default: true)
   - `l10n.useShortening` - Use shortened forms when needed (default: false)
-  - `l10n.terminology` - Custom terminology for consistent translations
 
 - **Supported Language Codes**: BCP-47 format (e.g., `en`, `es`, `fr`, `zh-CN`, `en-US`)
 

@@ -84,27 +84,6 @@
           "type": "boolean",
           "default": false,
           "description": "Use shortened forms if translation is longer than source text"
-        },
-        "l10n.terminology": {
-          "type": "array",
-          "default": [],
-          "description": "Custom terminology entries for consistent translations",
-          "items": {
-            "type": "object",
-            "properties": {
-              "term": {
-                "type": "string",
-                "description": "The term to use in translation"
-              },
-              "synonyms": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "List of synonyms that should be replaced by the term"
-              }
-            }
-          }
         }
       }
     }

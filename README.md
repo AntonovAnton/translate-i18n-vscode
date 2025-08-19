@@ -7,7 +7,7 @@ AI-powered localization for VS Code. Translate i18n JSON files directly in your 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI
 - 🔐 **Secure API Key Storage**: Your API keys are stored securely using VS Code's built-in secrets manager
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure
-- 🔧 **Customizable Options**: Configure contractions, shortening, and custom terminology
+- 🔧 **Customizable Options**: Configure contractions, and shortening
 - 📁 **Multiple Project Structures**: Supports various i18n folder structures
 - 💰 **Free Trial**: New users get 30,000 characters free for 3 days
 
@@ -71,23 +71,6 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 
 - **Use Contractions**: Makes translations less formal (default: true)
 - **Use Shortening**: Uses shortened forms if translation is longer than source (default: false)
-- **Terminology**: Define custom terms for consistent translations
-
-### Custom Terminology Example
-```json
-{
-  "l10n.terminology": [
-    {
-      "term": "dashboard",
-      "synonyms": ["control panel", "main screen"]
-    },
-    {
-      "term": "login",
-      "synonyms": ["sign in", "log in"]
-    }
-  ]
-}
-```
 
 ## Commands
 

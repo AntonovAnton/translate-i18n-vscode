@@ -8,12 +8,6 @@ interface TranslationRequest {
   targetLanguageCode: string;
   useContractions?: boolean;
   useShortening?: boolean;
-  terminology?: TerminologyEntry[];
-}
-
-interface TerminologyEntry {
-  term: string;
-  synonyms?: string[];
 }
 
 interface TranslationResult {
@@ -27,12 +21,6 @@ interface TranslationResult {
 
 interface TranslationUsage {
   charsUsed?: number;
-  details?: UsageDetails;
-}
-
-interface UsageDetails {
-  terminologyCharCount?: number;
-  sourceStringsCharCount?: number;
 }
 
 enum FinishReason {
@@ -128,7 +116,6 @@ class L10nTranslationService {
       targetLanguageCode,
       useContractions: config.get("useContractions", true),
       useShortening: config.get("useShortening", false),
-      terminology: config.get("terminology", []),
     };
 
     const response = await fetch(`${this.baseUrl}/translate`, {
@@ -535,8 +522,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 const action = await vscode.window.showInformationMessage(
                   message,
-                  "Open File",
-                  "View Usage"
+                  "Open File"
                 );
 
                 if (action === "Open File") {
@@ -544,12 +530,6 @@ export function activate(context: vscode.ExtensionContext) {
                     outputPath
                   );
                   await vscode.window.showTextDocument(doc);
-                } else if (action === "View Usage") {
-                  const usageDetails = result.usage.details;
-                  const detailMessage = usageDetails
-                    ? `Source strings: ${usageDetails.sourceStringsCharCount} chars\nTerminology: ${usageDetails.terminologyCharCount} chars\nTotal: ${charsUsed} chars`
-                    : `Total characters used: ${charsUsed}`;
-                  vscode.window.showInformationMessage(detailMessage);
                 }
               }, 100); // Small delay to ensure progress dialog closes first
             } catch (error) {
