@@ -1,0 +1,26 @@
+Translate I18n JSON by l10n.dev
+Copyright (C) 2025 Antonov Anton Yurevich, Individual Entrepreneur. <https://l10n.dev/>
+
+This repository contains the source code of the Visual Studio Code extension
+"Translate I18n JSON by l10n.dev".
+
+License:
+--------
+The extension source code is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+See the LICENSE file for the complete license text.
+
+Usage of l10n.dev service:
+--------------------------
+This extension connects to the l10n.dev platform, which provides AI-powered translation
+for internationalization (i18n) files. The l10n.dev backend service is proprietary
+and not covered by the AGPL license. A valid l10n.dev account and API key are required
+to use the translation features of this extension.
+
+You may freely use, modify, and distribute this extension under the terms of AGPLv3.
+However, this does not grant any rights to the l10n.dev backend services, which remain
+the exclusive property of Antonov Anton Yurevich, Individual Entrepreneur.
+
+Trademark Notice:
+-----------------
+"l10n.dev" and associated branding are trademarks of Antonov Anton Yurevich,
+Individual Entrepreneur. Use of these names and branding is subject to applicable law.
