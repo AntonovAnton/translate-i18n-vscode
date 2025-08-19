@@ -1,167 +1,280 @@
-import * as assert from 'assert';
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as os from 'os';
+import * as assert from "assert";
+import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
+import * as os from "os";
 
-// Import our extension modules for testing
-// We need to import the classes directly since they're not exported from the main module
-// For testing purposes, we'll create a temporary test implementation
+// Import using CommonJS-style require instead
+const languageDetectorModule = require("../languageDetector");
+const LanguageDetector = languageDetectorModule.LanguageDetector;
+const ProjectStructureType = languageDetectorModule.ProjectStructureType;
 
-suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+suite("Extension Test Suite", () => {
+  vscode.window.showInformationMessage("Start all tests.");
 
-	suite('Language Detection and File Path Generation', () => {
-		let tempDir: string;
-		
-		// Mock LanguageDetector for testing
-		class TestLanguageDetector {
-			private readonly languageCodeRegex =
-				/^(?<language>[a-z]{2,3})(-(?<script>[A-Z][a-z]{3}))?(-(?<region>[A-Z]{2,3}|[0-9]{3}))?$/i;
+  suite("Language Detection and File Path Generation", () => {
+    let tempDir: string;
+    let detector: any;
 
-			detectProjectStructure(sourceFilePath: string) {
-				const sourceDir = path.dirname(sourceFilePath);
-				const sourceFileName = path.basename(sourceFilePath, ".json");
-				
-				// Check if the source file name is a language code (file-based structure)
-				if (this.languageCodeRegex.test(sourceFileName)) {
-					return {
-						type: "file" as const,
-						basePath: sourceDir,
-						sourceLanguage: sourceFileName
-					};
-				}
+    setup(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "test-i18n-"));
+      detector = new LanguageDetector();
+    });
 
-				// Check if the parent directory is a language code (folder-based structure)
-				const parentDirName = path.basename(sourceDir);
-				if (this.languageCodeRegex.test(parentDirName)) {
-					return {
-						type: "folder" as const,
-						basePath: path.dirname(sourceDir),
-						sourceLanguage: parentDirName
-					};
-				}
+    teardown(() => {
+      // Cleanup temp directory
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    });
 
-				return {
-					type: "unknown" as const,
-					basePath: sourceDir
-				};
-			}
+    suite("Project Structure Detection", () => {
+      test("detects folder-based structure (locales/en/common.json)", () => {
+        // Create folder structure
+        const localesDir = path.join(tempDir, "locales", "en");
+        fs.mkdirSync(localesDir, { recursive: true });
+        const sourceFile = path.join(localesDir, "common.json");
+        fs.writeFileSync(sourceFile, "{}");
 
-			generateTargetFilePath(sourceFilePath: string, targetLanguage: string): string {
-				const structureInfo = this.detectProjectStructure(sourceFilePath);
-				const sourceFileName = path.basename(sourceFilePath, ".json");
+        const structure = detector.detectProjectStructure(sourceFile);
 
-				switch (structureInfo.type) {
-					case "folder": {
-						const targetDir = path.join(structureInfo.basePath, targetLanguage);
-						return path.join(targetDir, `${sourceFileName}.json`);
-					}
-					case "file": {
-						return path.join(structureInfo.basePath, `${targetLanguage}.json`);
-					}
-					default: {
-						const sourceDir = path.dirname(sourceFilePath);
-						return path.join(sourceDir, `${sourceFileName}.${targetLanguage}.json`);
-					}
-				}
-			}
-		}
+        assert.strictEqual(structure.type, ProjectStructureType.FolderBased);
+        assert.strictEqual(structure.basePath, path.join(tempDir, "locales"));
+        assert.strictEqual(structure.sourceLanguage, "en");
+      });
 
-		setup(() => {
-			tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vscode-test-'));
-		});
+      test("detects file-based structure (i18n/en.json)", () => {
+        // Create file structure
+        const i18nDir = path.join(tempDir, "i18n");
+        fs.mkdirSync(i18nDir, { recursive: true });
+        const sourceFile = path.join(i18nDir, "en.json");
+        fs.writeFileSync(sourceFile, "{}");
 
-		teardown(() => {
-			if (fs.existsSync(tempDir)) {
-				fs.rmSync(tempDir, { recursive: true, force: true });
-			}
-		});
+        const structure = detector.detectProjectStructure(sourceFile);
 
-		test('should detect folder-based structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create folder-based structure
-			const enDir = path.join(tempDir, 'locales', 'en');
-			fs.mkdirSync(enDir, { recursive: true });
-			const sourceFile = path.join(enDir, 'common.json');
-			
-			const result = detector.detectProjectStructure(sourceFile);
-			
-			assert.strictEqual(result.type, 'folder');
-			assert.strictEqual(result.sourceLanguage, 'en');
-			assert.strictEqual(result.basePath, path.join(tempDir, 'locales'));
-		});
+        assert.strictEqual(structure.type, ProjectStructureType.FileBased);
+        assert.strictEqual(structure.basePath, i18nDir);
+        assert.strictEqual(structure.sourceLanguage, "en");
+      });
 
-		test('should detect file-based structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create file-based structure
-			const i18nDir = path.join(tempDir, 'i18n');
-			fs.mkdirSync(i18nDir, { recursive: true });
-			const sourceFile = path.join(i18nDir, 'en.json');
-			
-			const result = detector.detectProjectStructure(sourceFile);
-			
-			assert.strictEqual(result.type, 'file');
-			assert.strictEqual(result.sourceLanguage, 'en');
-			assert.strictEqual(result.basePath, i18nDir);
-		});
+      test("detects complex language codes (zh-Hans-CN)", () => {
+        // Create folder structure with complex language code
+        const localesDir = path.join(tempDir, "locales", "zh-Hans-CN");
+        fs.mkdirSync(localesDir, { recursive: true });
+        const sourceFile = path.join(localesDir, "app.json");
+        fs.writeFileSync(sourceFile, "{}");
 
-		test('should return unknown for non-standard structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create non-standard structure
-			const someDir = path.join(tempDir, 'translations');
-			fs.mkdirSync(someDir, { recursive: true });
-			const sourceFile = path.join(someDir, 'messages.json');
-			
-			const result = detector.detectProjectStructure(sourceFile);
-			
-			assert.strictEqual(result.type, 'unknown');
-			assert.strictEqual(result.basePath, someDir);
-		});
+        const structure = detector.detectProjectStructure(sourceFile);
 
-		test('should generate correct path for folder-based structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create folder-based structure
-			const enDir = path.join(tempDir, 'locales', 'en');
-			fs.mkdirSync(enDir, { recursive: true });
-			const sourceFile = path.join(enDir, 'common.json');
-			
-			const targetPath = detector.generateTargetFilePath(sourceFile, 'es');
-			const expectedPath = path.join(tempDir, 'locales', 'es', 'common.json');
-			
-			assert.strictEqual(targetPath, expectedPath);
-		});
+        assert.strictEqual(structure.type, ProjectStructureType.FolderBased);
+        assert.strictEqual(structure.sourceLanguage, "zh-Hans-CN");
+      });
 
-		test('should generate correct path for file-based structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create file-based structure
-			const i18nDir = path.join(tempDir, 'i18n');
-			fs.mkdirSync(i18nDir, { recursive: true });
-			const sourceFile = path.join(i18nDir, 'en.json');
-			
-			const targetPath = detector.generateTargetFilePath(sourceFile, 'es');
-			const expectedPath = path.join(i18nDir, 'es.json');
-			
-			assert.strictEqual(targetPath, expectedPath);
-		});
+      test("returns unknown structure for unrecognized patterns", () => {
+        // Create a file that doesn't match known patterns
+        const randomDir = path.join(tempDir, "translations");
+        fs.mkdirSync(randomDir, { recursive: true });
+        const sourceFile = path.join(randomDir, "messages.json");
+        fs.writeFileSync(sourceFile, "{}");
 
-		test('should fallback to default naming for unknown structure', () => {
-			const detector = new TestLanguageDetector();
-			
-			// Create unknown structure
-			const someDir = path.join(tempDir, 'translations');
-			fs.mkdirSync(someDir, { recursive: true });
-			const sourceFile = path.join(someDir, 'messages.json');
-			
-			const targetPath = detector.generateTargetFilePath(sourceFile, 'es');
-			const expectedPath = path.join(someDir, 'messages.es.json');
-			
-			assert.strictEqual(targetPath, expectedPath);
-		});
-	});
+        const structure = detector.detectProjectStructure(sourceFile);
+
+        assert.strictEqual(structure.type, ProjectStructureType.Unknown);
+        assert.strictEqual(structure.basePath, randomDir);
+        assert.strictEqual(structure.sourceLanguage, undefined);
+      });
+    });
+
+    suite("Target File Path Generation", () => {
+      test("generates folder-based target path", () => {
+        // Setup folder-based structure
+        const localesDir = path.join(tempDir, "locales", "en");
+        fs.mkdirSync(localesDir, { recursive: true });
+        const sourceFile = path.join(localesDir, "common.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        const targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+
+        const expectedPath = path.join(tempDir, "locales", "fr", "common.json");
+        assert.strictEqual(targetPath, expectedPath);
+      });
+
+      test("generates file-based target path", () => {
+        // Setup file-based structure
+        const i18nDir = path.join(tempDir, "i18n");
+        fs.mkdirSync(i18nDir, { recursive: true });
+        const sourceFile = path.join(i18nDir, "en.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        const targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+
+        const expectedPath = path.join(i18nDir, "fr.json");
+        assert.strictEqual(targetPath, expectedPath);
+      });
+
+      test("handles unknown structure", () => {
+        // Setup unknown structure
+        const translationsDir = path.join(tempDir, "translations");
+        fs.mkdirSync(translationsDir, { recursive: true });
+        const sourceFile = path.join(translationsDir, "messages.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        const targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+
+        const expectedPath = path.join(translationsDir, "messages.fr.json");
+        assert.strictEqual(targetPath, expectedPath);
+      });
+
+      test("handles file conflicts with numbering", () => {
+        // Setup file-based structure
+        const i18nDir = path.join(tempDir, "i18n");
+        fs.mkdirSync(i18nDir, { recursive: true });
+        const sourceFile = path.join(i18nDir, "en.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        // Create conflicting files
+        const conflictFile1 = path.join(i18nDir, "fr.json");
+        const conflictFile2 = path.join(i18nDir, "fr (1).json");
+        fs.writeFileSync(conflictFile1, "{}");
+        fs.writeFileSync(conflictFile2, "{}");
+
+        const targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+
+        const expectedPath = path.join(i18nDir, "fr (2).json");
+        assert.strictEqual(targetPath, expectedPath);
+      });
+
+      test("preserves case of original language code", () => {
+        // Setup with mixed case language code
+        const localesDir = path.join(tempDir, "locales", "zh-Hans-CN");
+        fs.mkdirSync(localesDir, { recursive: true });
+        const sourceFile = path.join(localesDir, "app.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        const targetPath = detector.generateTargetFilePath(sourceFile, "JA-jp");
+
+        const expectedPath = path.join(tempDir, "locales", "JA-jp", "app.json");
+        assert.strictEqual(targetPath, expectedPath);
+      });
+    });
+
+    suite("Language Code Normalization", () => {
+      test("normalizes simple language codes", () => {
+        const normalized = detector.normalizeLanguageCode("EN");
+        assert.strictEqual(normalized, "en");
+      });
+
+      test("normalizes complex language codes", () => {
+        const normalized = detector.normalizeLanguageCode("ZH-hans-CN");
+        assert.strictEqual(normalized, "zh-Hans-CN");
+      });
+
+      test("preserves case for script codes", () => {
+        const normalized = detector.normalizeLanguageCode("zh-HANS-cn");
+        assert.strictEqual(normalized, "zh-Hans-CN");
+      });
+
+      test("handles unknown formats gracefully", () => {
+        const normalized = detector.normalizeLanguageCode("invalid-code");
+        assert.strictEqual(normalized, "invalid-code");
+      });
+    });
+
+    suite("Language Code Validation", () => {
+      test("validates correct language codes", () => {
+        assert.strictEqual(detector.validateLanguageCode("en"), true);
+        assert.strictEqual(detector.validateLanguageCode("zh-Hans-CN"), true);
+        assert.strictEqual(detector.validateLanguageCode("fr-FR"), true);
+      });
+
+      test("rejects invalid language codes", () => {
+        assert.strictEqual(detector.validateLanguageCode(""), false);
+        assert.strictEqual(detector.validateLanguageCode("invalid"), false);
+        assert.strictEqual(detector.validateLanguageCode("x"), false);
+      });
+    });
+
+    suite("Language Detection from Project", () => {
+      test("detects available languages in folder-based structure", () => {
+        // Create multiple language folders
+        const localesDir = path.join(tempDir, "locales");
+        const languages = ["en", "fr", "de", "zh-Hans-CN"];
+
+        for (const lang of languages) {
+          const langDir = path.join(localesDir, lang);
+          fs.mkdirSync(langDir, { recursive: true });
+          fs.writeFileSync(path.join(langDir, "common.json"), "{}");
+        }
+
+        const sourceFile = path.join(localesDir, "en", "common.json");
+        const detectedLanguages =
+          detector.detectLanguagesFromProject(sourceFile);
+
+        assert.strictEqual(detectedLanguages.length, 3);
+        assert.deepStrictEqual(
+          detectedLanguages.sort(),
+          ["fr", "de", "zh-Hans-CN"].sort()
+        );
+      });
+
+      test("detects available languages in file-based structure", () => {
+        // Create multiple language files
+        const i18nDir = path.join(tempDir, "i18n");
+        fs.mkdirSync(i18nDir, { recursive: true });
+        const languages = ["en", "fr", "de", "ja"];
+
+        for (const lang of languages) {
+          fs.writeFileSync(path.join(i18nDir, `${lang}.json`), "{}");
+        }
+
+        const sourceFile = path.join(i18nDir, "en.json");
+        const detectedLanguages =
+          detector.detectLanguagesFromProject(sourceFile);
+
+        assert.strictEqual(detectedLanguages.length, 3);
+        assert.deepStrictEqual(
+          detectedLanguages.sort(),
+          ["fr", "de", "ja"].sort()
+        );
+      });
+
+      test("returns empty array for unknown structure", () => {
+        const translationsDir = path.join(tempDir, "translations");
+        fs.mkdirSync(translationsDir, { recursive: true });
+        const sourceFile = path.join(translationsDir, "messages.json");
+        fs.writeFileSync(sourceFile, "{}");
+
+        const detectedLanguages =
+          detector.detectLanguagesFromProject(sourceFile);
+
+        assert.strictEqual(detectedLanguages.length, 0);
+      });
+
+      test("handles case-insensitive language detection", () => {
+        // Create files with mixed case language codes
+        const i18nDir = path.join(tempDir, "i18n");
+        fs.mkdirSync(i18nDir, { recursive: true });
+
+        fs.writeFileSync(path.join(i18nDir, "EN.json"), "{}");
+        fs.writeFileSync(path.join(i18nDir, "RU.json"), "{}");
+        fs.writeFileSync(path.join(i18nDir, "Fr.json"), "{}");
+        fs.writeFileSync(path.join(i18nDir, "de.json"), "{}");
+
+        const sourceFile = path.join(i18nDir, "EN.json");
+        const detectedLanguages =
+          detector.detectLanguagesFromProject(sourceFile);
+
+        assert.strictEqual(detectedLanguages.length, 3);
+        // Should preserve original case
+        assert.deepStrictEqual(
+          detectedLanguages.sort((a: string, b: string) =>
+            a.localeCompare(b, undefined, { sensitivity: "base" })
+          ),
+          ["de", "Fr", "RU"].sort((a: string, b: string) =>
+            a.localeCompare(b, undefined, { sensitivity: "base" })
+          )
+        );
+      });
+    });
+  });
 });
