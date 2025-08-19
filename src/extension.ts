@@ -50,17 +50,19 @@ class L10nTranslationService {
 
   private async getApiKey(): Promise<string | undefined> {
     // Try to get API key from secure storage first
-    let apiKey = await this.context.secrets.get("l10n.apiKey");
+    let apiKey = await this.context.secrets.get("l10n-translate-i18n.apiKey");
 
     if (!apiKey) {
       // Fallback to configuration (for backward compatibility)
-      apiKey = vscode.workspace.getConfiguration("l10n").get("apiKey");
+      apiKey = vscode.workspace
+        .getConfiguration("l10n-translate-i18n")
+        .get("apiKey");
       if (apiKey) {
         // Migrate to secure storage
-        await this.context.secrets.store("l10n.apiKey", apiKey);
+        await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
         // Clear from configuration
         await vscode.workspace
-          .getConfiguration("l10n")
+          .getConfiguration("l10n-translate-i18n")
           .update("apiKey", undefined, vscode.ConfigurationTarget.Global);
       }
     }
@@ -77,7 +79,7 @@ class L10nTranslationService {
     });
 
     if (apiKey) {
-      await this.context.secrets.store("l10n.apiKey", apiKey);
+      await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
       vscode.window.showInformationMessage("API Key saved securely! 🔐");
     }
   }
@@ -110,7 +112,7 @@ class L10nTranslationService {
       throw new Error("API Key not set. Please configure your API key first.");
     }
 
-    const config = vscode.workspace.getConfiguration("l10n");
+    const config = vscode.workspace.getConfiguration("l10n-translate-i18n");
     const translationRequest: TranslationRequest = {
       sourceStrings,
       targetLanguageCode,

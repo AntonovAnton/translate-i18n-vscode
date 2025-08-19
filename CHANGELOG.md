@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "l10n.translate-i18n" extension will be documented in this file.
+All notable changes to the "translate-i18n" extension will be documented in this file.
 
 ## [0.0.1] - 2025-08-14
 
@@ -20,13 +20,13 @@ All notable changes to the "l10n.translate-i18n" extension will be documented in
 
 ### Features
 - **Commands**:
-  - `l10n.dev: Set API Key` - Securely configure API key
-  - `l10n.dev: Configure Translation Options` - Open extension settings
-  - `l10n.dev: Translate JSON to...` - Translate JSON files
+  - `Translate I18n: Set API Key` - Securely configure API key
+  - `Translate I18n: Configure Translation Options` - Open extension settings
+  - `Translate I18n: Translate JSON to...` - Translate JSON files
 
 - **Configuration Options**:
-  - `l10n.useContractions` - Use grammar contractions (default: true)
-  - `l10n.useShortening` - Use shortened forms when needed (default: false)
+  - `l10n-translate-i18n.useContractions` - Use grammar contractions (default: true)
+  - `l10n-translate-i18n.useShortening` - Use shortened forms when needed (default: false)
 
 - **Supported Language Codes**: BCP-47 format (e.g., `en`, `es`, `fr`, `zh-CN`, `en-US`)
 

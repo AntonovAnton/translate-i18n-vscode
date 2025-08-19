@@ -1,8 +1,8 @@
 {
-  "name": "l10n.translate-i18n",
+  "name": "translate-i18n",
   "displayName": "Translate I18n JSON by l10n.dev",
   "description": "Translate i18n JSON files with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
@@ -48,17 +48,17 @@
       {
         "command": "l10n.translate-i18n.translate",
         "title": "Translate JSON to...",
-        "category": "l10n.dev"
+        "category": "Translate I18n"
       },
       {
         "command": "l10n.translate-i18n.setApiKey",
         "title": "Set API Key",
-        "category": "l10n.dev"
+        "category": "Translate I18n"
       },
       {
         "command": "l10n.translate-i18n.configureOptions",
         "title": "Configure Translation Options",
-        "category": "l10n.dev"
+        "category": "Translate I18n"
       }
     ],
     "menus": {
@@ -78,20 +78,21 @@
       ]
     },
     "configuration": {
-      "title": "l10n.dev Translation",
+      "title": "Translate I18n JSON by l10n.dev",
+      "description": "Settings for the Translate I18n JSON by l10n.dev extension",
       "properties": {
-        "l10n.apiKey": {
+        "l10n-translate-i18n.apiKey": {
           "type": "string",
           "default": "",
-          "description": "API Key for l10n.dev service (stored securely)",
+          "description": "API Key for l10n.dev service (stored securely in VS Code secrets)",
           "scope": "machine"
         },
-        "l10n.useContractions": {
+        "l10n-translate-i18n.useContractions": {
           "type": "boolean",
           "default": true,
           "description": "Use grammar contractions (makes translation less formal)"
         },
-        "l10n.useShortening": {
+        "l10n-translate-i18n.useShortening": {
           "type": "boolean",
           "default": false,
           "description": "Use shortened forms if translation is longer than source text"
