@@ -92,7 +92,7 @@ function registerCommands(
         "Clear API Key",
         "Cancel"
       );
-      
+
       if (action === "Clear API Key") {
         await apiKeyManager.clearApiKey();
       }

@@ -20,8 +20,10 @@ export class ApiKeyManager {
     // If user has set a new API Key in configuration, it takes precedence
     // This allows users to update expired keys through settings UI
     if (configApiKey && configApiKey.trim()) {
-      getOutputChannel().appendLine(`[${new Date().toISOString()}] API Key found in configuration, migrating to secure storage`);
-      
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] API Key found in configuration, migrating to secure storage`
+      );
+
       // If it's different from secure storage, update secure storage
       if (configApiKey !== secureApiKey) {
         await this.context.secrets.store(this.SECRET_KEY, configApiKey);
@@ -38,12 +40,16 @@ export class ApiKeyManager {
           vscode.window.showInformationMessage(
             "API Key updated and moved to secure storage! 🔐"
           );
-          getOutputChannel().appendLine(`[${new Date().toISOString()}] API Key updated and migrated to secure storage`);
+          getOutputChannel().appendLine(
+            `[${new Date().toISOString()}] API Key updated and migrated to secure storage`
+          );
         } else {
           vscode.window.showInformationMessage(
             "API Key migrated to secure storage for better security! 🔐"
           );
-          getOutputChannel().appendLine(`[${new Date().toISOString()}] API Key migrated to secure storage`);
+          getOutputChannel().appendLine(
+            `[${new Date().toISOString()}] API Key migrated to secure storage`
+          );
         }
       }
       return configApiKey;
@@ -51,9 +57,13 @@ export class ApiKeyManager {
 
     // If no config API Key, use the one from secure storage
     if (secureApiKey) {
-      getOutputChannel().appendLine(`[${new Date().toISOString()}] Using API Key from secure storage`);
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] Using API Key from secure storage`
+      );
     } else {
-      getOutputChannel().appendLine(`[${new Date().toISOString()}] No API Key found in storage or configuration`);
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] No API Key found in storage or configuration`
+      );
     }
     return secureApiKey;
   }
@@ -87,8 +97,10 @@ export class ApiKeyManager {
    * Useful for resetting expired or invalid keys
    */
   async clearApiKey(): Promise<void> {
-    getOutputChannel().appendLine(`[${new Date().toISOString()}] Clearing API Key from secure storage and configuration`);
-    
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Clearing API Key from secure storage and configuration`
+    );
+
     // Clear from secure storage
     await this.context.secrets.delete(this.SECRET_KEY);
 
@@ -101,15 +113,19 @@ export class ApiKeyManager {
         vscode.ConfigurationTarget.Global
       );
 
-    getOutputChannel().appendLine(`[${new Date().toISOString()}] API Key cleared successfully from all storage locations`);
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] API Key cleared successfully from all storage locations`
+    );
     vscode.window.showInformationMessage(
       "API Key cleared. You can set a new one in the extension settings or using the 'Set API Key' command."
     );
   }
 
   async setApiKey(): Promise<string | undefined> {
-    getOutputChannel().appendLine(`[${new Date().toISOString()}] User requested to set new API Key`);
-    
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] User requested to set new API Key`
+    );
+
     const apiKey = await vscode.window.showInputBox({
       prompt: "Enter your l10n.dev API Key",
       placeHolder: `Get your API Key from ${URLS.API_KEYS}`,
@@ -119,10 +135,14 @@ export class ApiKeyManager {
 
     if (apiKey) {
       await this.context.secrets.store(this.SECRET_KEY, apiKey);
-      getOutputChannel().appendLine(`[${new Date().toISOString()}] New API Key stored securely`);
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] New API Key stored securely`
+      );
       vscode.window.showInformationMessage("API Key saved securely! 🔐");
     } else {
-      getOutputChannel().appendLine(`[${new Date().toISOString()}] API Key setup cancelled by user`);
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] API Key setup cancelled by user`
+      );
     }
 
     return apiKey;
