@@ -69,36 +69,6 @@ export class I18nProjectManager {
     );
   }
 
-  detectProjectStructure(sourceFilePath: string): ProjectStructureInfo {
-    const sourceDir = path.dirname(sourceFilePath);
-    const sourceFileName = path.basename(sourceFilePath, ".json");
-
-    // Check if the parent directory name is a language code (folder-based structure)
-    const parentDirName = path.basename(sourceDir);
-    if (this.languageCodeRegex.test(parentDirName)) {
-      return {
-        type: ProjectStructureType.FolderBased,
-        basePath: path.dirname(sourceDir),
-        sourceLanguage: parentDirName,
-      };
-    }
-
-    // Check if the source file name is a language code (file-based structure)
-    if (this.languageCodeRegex.test(sourceFileName)) {
-      return {
-        type: ProjectStructureType.FileBased,
-        basePath: sourceDir,
-        sourceLanguage: sourceFileName,
-      };
-    }
-
-    // Unknown structure
-    return {
-      type: ProjectStructureType.Unknown,
-      basePath: sourceDir,
-    };
-  }
-
   generateTargetFilePath(
     sourceFilePath: string,
     targetLanguage: string
@@ -165,6 +135,36 @@ export class I18nProjectManager {
 
   validateLanguageCode(code: string): boolean {
     return !!code && this.languageCodeRegex.test(code);
+  }
+
+  private detectProjectStructure(sourceFilePath: string): ProjectStructureInfo {
+    const sourceDir = path.dirname(sourceFilePath);
+    const sourceFileName = path.basename(sourceFilePath, ".json");
+
+    // Check if the parent directory name is a language code (folder-based structure)
+    const parentDirName = path.basename(sourceDir);
+    if (this.languageCodeRegex.test(parentDirName)) {
+      return {
+        type: ProjectStructureType.FolderBased,
+        basePath: path.dirname(sourceDir),
+        sourceLanguage: parentDirName,
+      };
+    }
+
+    // Check if the source file name is a language code (file-based structure)
+    if (this.languageCodeRegex.test(sourceFileName)) {
+      return {
+        type: ProjectStructureType.FileBased,
+        basePath: sourceDir,
+        sourceLanguage: sourceFileName,
+      };
+    }
+
+    // Unknown structure
+    return {
+      type: ProjectStructureType.Unknown,
+      basePath: sourceDir,
+    };
   }
 
   private getUniqueFilePath(filePath: string): string {
