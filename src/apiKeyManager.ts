@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
+import { CONFIG, URLS } from "./constants";
 
 export class ApiKeyManager {
   private readonly context: vscode.ExtensionContext;
-  private readonly CONFIG_SECTION = "l10n-translate-i18n";
-  private readonly CONFIG_KEY = "apiKey";
-  private readonly SECRET_KEY = `${this.CONFIG_SECTION}.${this.CONFIG_KEY}`;
+  private readonly SECRET_KEY = `${CONFIG.SECTION}.${CONFIG.KEYS.API_KEY}`;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
@@ -17,16 +16,16 @@ export class ApiKeyManager {
     if (!apiKey) {
       // Fallback to configuration (for backward compatibility)
       apiKey = vscode.workspace
-        .getConfiguration(this.CONFIG_SECTION)
-        .get(this.CONFIG_KEY);
+        .getConfiguration(CONFIG.SECTION)
+        .get(CONFIG.KEYS.API_KEY);
       if (apiKey) {
         // Migrate to secure storage
         await this.context.secrets.store(this.SECRET_KEY, apiKey);
         // Clear from configuration
         await vscode.workspace
-          .getConfiguration(this.CONFIG_SECTION)
+          .getConfiguration(CONFIG.SECTION)
           .update(
-            this.CONFIG_KEY,
+            CONFIG.KEYS.API_KEY,
             undefined,
             vscode.ConfigurationTarget.Global
           );
@@ -39,7 +38,7 @@ export class ApiKeyManager {
   async setApiKey(): Promise<void> {
     const apiKey = await vscode.window.showInputBox({
       prompt: "Enter your l10n.dev API Key",
-      placeHolder: "Get your API Key from https://l10n.dev/ws/keys",
+      placeHolder: `Get your API Key from ${URLS.API_KEYS}`,
       password: true,
       ignoreFocusOut: true,
     });

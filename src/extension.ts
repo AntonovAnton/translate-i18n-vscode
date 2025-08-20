@@ -3,8 +3,18 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { I18nProjectManager } from "./i18nProjectManager";
-import { L10nTranslationService, FinishReason } from "./translationService";
+import {
+  L10nTranslationService,
+  TranslationRequest,
+} from "./translationService";
 import { LanguageSelector } from "./languageSelector";
+import {
+  COMMANDS,
+  VSCODE_COMMANDS,
+  STATE_KEYS,
+  URLS,
+  CONFIG,
+} from "./constants";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("l10n.dev Translation extension is now active!");
@@ -15,27 +25,30 @@ export function activate(context: vscode.ExtensionContext) {
   const languageSelector = new LanguageSelector(translationService);
 
   // Show welcome message for new users
-  const hasShownWelcome = context.globalState.get("hasShownWelcome", false);
+  const hasShownWelcome = context.globalState.get(
+    STATE_KEYS.WELCOME_SHOWN,
+    false
+  );
   if (!hasShownWelcome) {
     vscode.window
       .showInformationMessage(
-        "🎉 Welcome to l10n.dev! New users get 30,000 characters free for 3 days. Get your API key from https://l10n.dev/ws/keys",
+        `🎉 Welcome to l10n.dev! New users get 30,000 characters free for 3 days. Get your API key from ${URLS.API_KEYS}`,
         "Set API Key",
         "Learn More"
       )
       .then((selection) => {
         if (selection === "Set API Key") {
-          vscode.commands.executeCommand("l10n.translate-i18n.setApiKey");
+          vscode.commands.executeCommand(COMMANDS.SET_API_KEY);
         } else if (selection === "Learn More") {
-          vscode.env.openExternal(vscode.Uri.parse("https://l10n.dev"));
+          vscode.env.openExternal(vscode.Uri.parse(URLS.BASE));
         }
       });
-    context.globalState.update("hasShownWelcome", true);
+    context.globalState.update(STATE_KEYS.WELCOME_SHOWN, true);
   }
 
   // Register set API key command
   const setApiKeyDisposable = vscode.commands.registerCommand(
-    "l10n.translate-i18n.setApiKey",
+    COMMANDS.SET_API_KEY,
     async () => {
       await apiKeyManager.setApiKey();
     }
@@ -43,18 +56,18 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register configure options command
   const configureOptionsDisposable = vscode.commands.registerCommand(
-    "l10n.translate-i18n.configureOptions",
+    COMMANDS.CONFIGURE_OPTIONS,
     async () => {
       await vscode.commands.executeCommand(
-        "workbench.action.openSettings",
-        "l10n"
+        VSCODE_COMMANDS.OPEN_SETTINGS,
+        CONFIG.SECTION
       );
     }
   );
 
   // Register translate command
   const translateDisposable = vscode.commands.registerCommand(
-    "l10n.translate-i18n.translate",
+    COMMANDS.TRANSLATE,
     async (uri: vscode.Uri) => {
       try {
         // Ensure we have an API key
@@ -70,9 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
             await apiKeyManager.setApiKey();
             return;
           } else if (action === "Get API Key") {
-            vscode.env.openExternal(
-              vscode.Uri.parse("https://l10n.dev/ws/keys")
-            );
+            vscode.env.openExternal(vscode.Uri.parse(URLS.API_KEYS));
             return;
           }
           return;
@@ -108,13 +119,6 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        // Read JSON file
-        const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
-
-        // Normalize target language for API call
-        const normalizedTargetLanguage =
-          i18nProjectManager.normalizeLanguageCode(targetLanguage);
-
         // Show progress
         await vscode.window.withProgress(
           {
@@ -126,36 +130,22 @@ export function activate(context: vscode.ExtensionContext) {
             try {
               progress.report({ message: "Sending translation request..." });
 
-              const result = await translationService.translateJson(
-                fileContent,
-                normalizedTargetLanguage // Use normalized version for API
-              );
+              // Read JSON file
+              const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
 
-              // Handle finish reasons
-              if (result.finishReason) {
-                switch (result.finishReason) {
-                  case FinishReason.insufficientBalance:
-                    vscode.window.showWarningMessage(
-                      "Insufficient balance. Please visit https://l10n.dev/#pricing to purchase more characters."
-                    );
-                    return;
-                  case FinishReason.contentFilter:
-                    vscode.window.showWarningMessage(
-                      "Translation blocked by content filter."
-                    );
-                    return;
-                  case FinishReason.error:
-                    vscode.window.showErrorMessage(
-                      "Translation failed due to an error."
-                    );
-                    return;
-                  case FinishReason.length:
-                    vscode.window.showWarningMessage(
-                      "Translation truncated due to length limits."
-                    );
-                    break;
-                }
-              }
+              // Normalize target language for API call
+              const normalizedTargetLanguage =
+                i18nProjectManager.normalizeLanguageCode(targetLanguage);
+
+              const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
+              const request: TranslationRequest = {
+                sourceStrings: fileContent,
+                targetLanguageCode: normalizedTargetLanguage,
+                useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
+                useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
+              };
+
+              const result = await translationService.translateJson(request);
 
               if (!result.translations) {
                 vscode.window.showErrorMessage(

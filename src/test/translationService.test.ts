@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import * as sinon from "sinon";
+import { URLS } from "../constants";
 
 // Import the service and types
 const translationServiceModule = require("../translationService");
@@ -43,8 +44,6 @@ const mockFetch = sinon.stub();
 
 suite("L10nTranslationService Test Suite", () => {
   let service: any;
-  let mockContext: any;
-  let mockSecrets: any;
   let mockConfiguration: any;
   let mockApiKeyManager: any;
 
@@ -59,16 +58,6 @@ suite("L10nTranslationService Test Suite", () => {
     vscode.window.showInputBox.reset();
     vscode.window.showInformationMessage.reset();
     vscode.workspace.getConfiguration.reset();
-
-    // Create mock context
-    mockSecrets = {
-      get: sinon.stub(),
-      store: sinon.stub().resolves(),
-    };
-
-    mockContext = {
-      secrets: mockSecrets,
-    };
 
     // Create mock configuration
     mockConfiguration = {
@@ -135,22 +124,31 @@ suite("L10nTranslationService Test Suite", () => {
       mockApiKeyManager.getApiKey.resolves(undefined);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /API Key not set. Please configure your API key first./
       );
     });
 
     test("translateJson makes correct API call with valid API key", async () => {
       const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
       const sourceStrings = { hello: "Hello", world: "World" };
       const targetLanguage = "es";
-
-      mockApiKeyManager.getApiKey.resolves(apiKey);
-      vscode.workspace.getConfiguration
-        .withArgs("l10n-translate-i18n")
-        .returns(mockConfiguration);
-      mockConfiguration.get.withArgs("useContractions", true).returns(true);
-      mockConfiguration.get.withArgs("useShortening", false).returns(false);
+      const useContractions = false;
+      const useShortening = true;
+      const request = {
+        sourceStrings,
+        targetLanguageCode: targetLanguage,
+        useContractions,
+        useShortening,
+      };
 
       const mockTranslationResult = {
         targetLanguageCode: "es",
@@ -167,14 +165,14 @@ suite("L10nTranslationService Test Suite", () => {
 
       mockFetch.resolves(mockFetchResponse);
 
-      const result = await service.translateJson(sourceStrings, targetLanguage);
+      const result = await service.translateJson(request);
 
       assert.deepStrictEqual(result, mockTranslationResult);
 
       // Verify fetch was called with correct parameters
       assert.ok(mockFetch.called);
       const fetchCall = mockFetch.getCall(0);
-      assert.strictEqual(fetchCall.args[0], "https://l10n.dev/api/translate");
+      assert.strictEqual(fetchCall.args[0], `${URLS.API_BASE}/translate`);
 
       const requestOptions = fetchCall.args[1];
       assert.strictEqual(requestOptions.method, "POST");
@@ -187,8 +185,8 @@ suite("L10nTranslationService Test Suite", () => {
       const requestBody = JSON.parse(requestOptions.body);
       assert.deepStrictEqual(requestBody.sourceStrings, sourceStrings);
       assert.strictEqual(requestBody.targetLanguageCode, targetLanguage);
-      assert.strictEqual(requestBody.useContractions, true);
-      assert.strictEqual(requestBody.useShortening, false);
+      assert.strictEqual(requestBody.useContractions, false);
+      assert.strictEqual(requestBody.useShortening, true);
     });
 
     test("translateJson handles 400 Bad Request error", async () => {
@@ -206,7 +204,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /Invalid source strings format/
       );
     });
@@ -224,7 +228,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /Invalid API Key. Please check your API key./
       );
     });
@@ -246,7 +256,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /Insufficient balance. You need 1,000 characters to proceed/
       );
     });
@@ -264,7 +280,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /Request too large. Maximum request size is 10 MB./
       );
     });
@@ -284,7 +306,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /An internal server error occurred \(Error code: INTERNAL_ERROR_123\)/
       );
     });
@@ -315,7 +343,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /is required is invalid must be BCP-47 format/
       );
     });
@@ -335,7 +369,13 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /Field validation failed Invalid input format/
       );
     });
@@ -353,9 +393,193 @@ suite("L10nTranslationService Test Suite", () => {
       mockFetch.resolves(mockErrorResponse);
 
       await assert.rejects(
-        async () => await service.translateJson({}, "es"),
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
         /An internal server error occurred \(Error code: unknown\)/
       );
+    });
+  });
+
+  suite("Finish Reason Handling", () => {
+    test("throws error for insufficientBalance finish reason", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves({
+          targetLanguageCode: "es",
+          translations: { hello: "hola" },
+          usage: { charsUsed: 5 },
+          finishReason: "insufficientBalance",
+          completedChunks: 1,
+          totalChunks: 1,
+        }),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      await assert.rejects(
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
+        /Insufficient balance\. Please visit .* to purchase more characters\./
+      );
+    });
+
+    test("throws error for contentFilter finish reason", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves({
+          targetLanguageCode: "es",
+          translations: { hello: "hola" },
+          usage: { charsUsed: 5 },
+          finishReason: "contentFilter",
+          completedChunks: 1,
+          totalChunks: 1,
+        }),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      await assert.rejects(
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
+        /Translation blocked by content filter\./
+      );
+    });
+
+    test("throws error for error finish reason", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves({
+          targetLanguageCode: "es",
+          translations: { hello: "hola" },
+          usage: { charsUsed: 5 },
+          finishReason: "error",
+          completedChunks: 1,
+          totalChunks: 1,
+        }),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      await assert.rejects(
+        async () =>
+          await service.translateJson({
+            sourceStrings: {},
+            targetLanguageCode: "es",
+            useContractions: false,
+            useShortening: false,
+          }),
+        /Translation failed due to an error\./
+      );
+    });
+
+    test("does not throw error for length finish reason", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const expectedResult = {
+        targetLanguageCode: "es",
+        translations: { hello: "hola" },
+        usage: { charsUsed: 5 },
+        finishReason: "length",
+        completedChunks: 1,
+        totalChunks: 1,
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves(expectedResult),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      const result = await service.translateJson({
+        sourceStrings: {},
+        targetLanguageCode: "es",
+        useContractions: false,
+        useShortening: false,
+      });
+      assert.deepStrictEqual(result, expectedResult);
+    });
+
+    test("does not throw error for stop finish reason", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const expectedResult = {
+        targetLanguageCode: "es",
+        translations: { hello: "hola" },
+        usage: { charsUsed: 5 },
+        finishReason: "stop",
+        completedChunks: 1,
+        totalChunks: 1,
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves(expectedResult),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      const result = await service.translateJson({
+        sourceStrings: {},
+        targetLanguageCode: "es",
+        useContractions: false,
+        useShortening: false,
+      });
+      assert.deepStrictEqual(result, expectedResult);
+    });
+
+    test("works normally when no finish reason is present", async () => {
+      const apiKey = "valid-api-key";
+      mockApiKeyManager.getApiKey.resolves(apiKey);
+
+      const expectedResult = {
+        targetLanguageCode: "es",
+        translations: { hello: "hola" },
+        usage: { charsUsed: 5 },
+        completedChunks: 1,
+        totalChunks: 1,
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: sinon.stub().resolves(expectedResult),
+      };
+
+      mockFetch.resolves(mockResponse);
+
+      const result = await service.translateJson({
+        sourceStrings: {},
+        targetLanguageCode: "es",
+        useContractions: false,
+        useShortening: false,
+      });
+      assert.deepStrictEqual(result, expectedResult);
     });
   });
 });

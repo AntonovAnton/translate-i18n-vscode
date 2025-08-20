@@ -1,5 +1,5 @@
-import * as vscode from "vscode";
 import { ApiKeyManager } from "./apiKeyManager";
+import { URLS } from "./constants";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
@@ -40,7 +40,7 @@ export interface LanguagePredictionResponse {
 }
 
 export class L10nTranslationService {
-  private readonly baseUrl = "https://l10n.dev/api";
+  private readonly baseUrl = URLS.API_BASE;
   private readonly apiKeyManager: ApiKeyManager;
 
   constructor(apiKeyManager: ApiKeyManager) {
@@ -66,22 +66,11 @@ export class L10nTranslationService {
     return result.languages;
   }
 
-  async translateJson(
-    sourceStrings: string | Record<string, any>,
-    targetLanguageCode: string
-  ): Promise<TranslationResult> {
+  async translateJson(request: TranslationRequest): Promise<TranslationResult> {
     const apiKey = await this.apiKeyManager.getApiKey();
     if (!apiKey) {
       throw new Error("API Key not set. Please configure your API key first.");
     }
-
-    const config = vscode.workspace.getConfiguration("l10n-translate-i18n");
-    const translationRequest: TranslationRequest = {
-      sourceStrings,
-      targetLanguageCode,
-      useContractions: config.get("useContractions", true),
-      useShortening: config.get("useShortening", false),
-    };
 
     const response = await fetch(`${this.baseUrl}/translate`, {
       method: "POST",
@@ -89,7 +78,7 @@ export class L10nTranslationService {
         "Content-Type": "application/json",
         "X-API-Key": apiKey,
       },
-      body: JSON.stringify(translationRequest),
+      body: JSON.stringify(request),
     });
 
     if (!response.ok) {
@@ -134,7 +123,7 @@ export class L10nTranslationService {
           ) {
             const requiredChars =
               errorData.data.requiredCharactersForTranslation.toLocaleString();
-            message = `Insufficient balance. You need ${requiredChars} characters to proceed with the translation. Please visit https://l10n.dev/#pricing to purchase more characters.`;
+            message = `Insufficient balance. You need ${requiredChars} characters to proceed with the translation. Please visit ${URLS.PRICING} to purchase more characters.`;
           }
           errorMessage = message;
           break;
@@ -155,6 +144,23 @@ export class L10nTranslationService {
       throw new Error(errorMessage);
     }
 
-    return (await response.json()) as TranslationResult;
+    const result = (await response.json()) as TranslationResult;
+
+    // Handle finish reasons by throwing errors
+    if (result.finishReason) {
+      switch (result.finishReason) {
+        case FinishReason.insufficientBalance:
+          throw new Error(
+            `Insufficient balance. Please visit ${URLS.PRICING} to purchase more characters.`
+          );
+        case FinishReason.contentFilter:
+          throw new Error("Translation blocked by content filter.");
+        case FinishReason.error:
+          throw new Error("Translation failed due to an error.");
+        // Note: FinishReason.length is not treated as an error - translation is still usable
+      }
+    }
+
+    return result;
   }
 }
