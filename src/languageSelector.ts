@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { L10nTranslationService } from "./translationService";
+import { showAndLogError } from "./logger";
 
 export class LanguageSelector {
   constructor(private readonly translationService: L10nTranslationService) {}
@@ -110,10 +111,11 @@ export class LanguageSelector {
 
       return languageSelection.label;
     } catch (error) {
-      vscode.window.showErrorMessage(
+      showAndLogError(
         `Failed to search languages: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
+        error
       );
       return undefined;
     }

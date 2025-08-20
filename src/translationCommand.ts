@@ -13,37 +13,9 @@ import {
   TranslationRequest,
 } from "./translationService";
 import { LanguageSelector } from "./languageSelector";
+import { showAndLogError, logInfo } from "./logger";
 
 import { CONFIG } from "./constants";
-
-// Create output channel for detailed logging
-const outputChannel = vscode.window.createOutputChannel("Translate i18n JSON");
-
-/**
- * Handles errors with both user notification and detailed logging
- */
-function handleError(userMessage: string, error: unknown, context?: string) {
-  // Show user-friendly message
-  vscode.window.showErrorMessage(userMessage);
-
-  // Log detailed error information
-  const timestamp = new Date().toISOString();
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const stackTrace = error instanceof Error ? error.stack : "";
-
-  outputChannel.appendLine(`[${timestamp}] ERROR: ${userMessage}`);
-  if (context) {
-    outputChannel.appendLine(`Context: ${context}`);
-  }
-  outputChannel.appendLine(`Details: ${errorMessage}`);
-  if (stackTrace) {
-    outputChannel.appendLine(`Stack trace: ${stackTrace}`);
-  }
-  outputChannel.appendLine("---");
-
-  // Also log to console for development
-  console.error(`[Translate i18n JSON] ${userMessage}:`, error);
-}
 
 /**
  * Handles the main translate command workflow
@@ -68,16 +40,12 @@ export async function handleTranslateCommand(
 
     // If no valid JSON file is available, prompt user to search and open one
     if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
-      outputChannel.appendLine(
-        `[${new Date().toISOString()}] No selected JSON file, opening Quick Open panel`
-      );
+      logInfo("No selected JSON file, opening Quick Open panel");
 
       // Use VS Code's Quick Open panel (Ctrl+P equivalent)
       await vscode.commands.executeCommand("workbench.action.quickOpen");
 
-      outputChannel.appendLine(
-        `[${new Date().toISOString()}] Quick Open panel activated for user to search files`
-      );
+      logInfo("Quick Open panel activated for user to search files");
 
       // Show a message to guide the user
       vscode.window.showInformationMessage(
@@ -105,9 +73,7 @@ export async function handleTranslateCommand(
     if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
       const message = "Invalid language code format. Please use BCP-47 format.";
       vscode.window.showErrorMessage(message);
-      outputChannel.appendLine(
-        `[${new Date().toISOString()}] Validation error: ${message} (Language: ${targetLanguage})`
-      );
+      logInfo(`Validation error: ${message} (Language: ${targetLanguage})`);
       return;
     }
 
@@ -119,7 +85,7 @@ export async function handleTranslateCommand(
       i18nProjectManager
     );
   } catch (error) {
-    handleError(
+    showAndLogError(
       `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
       error,
       "Translation command execution"
@@ -167,9 +133,7 @@ async function performTranslation(
         if (!result.translations) {
           const message = "No translation results received.";
           vscode.window.showErrorMessage(message);
-          outputChannel.appendLine(
-            `[${new Date().toISOString()}] API error: ${message}`
-          );
+          logInfo(`API error: ${message}`);
           return;
         }
 
@@ -189,13 +153,13 @@ async function performTranslation(
         await showTranslationSuccess(result, outputPath);
 
         // Log successful translation
-        outputChannel.appendLine(
-          `[${new Date().toISOString()}] Translation completed successfully. File: ${path.basename(
+        logInfo(
+          `Translation completed successfully. File: ${path.basename(
             outputPath
           )}, Characters used: ${result.usage.charsUsed || 0}`
         );
       } catch (error) {
-        handleError(
+        showAndLogError(
           `Translation failed: ${
             error instanceof Error ? error.message : "Unknown error"
           }`,
@@ -228,12 +192,4 @@ async function showTranslationSuccess(result: any, outputPath: string) {
       await vscode.window.showTextDocument(doc);
     }
   }, 100);
-}
-
-/**
- * Gets the output channel for logging
- * Useful for other parts of the extension that need to log information
- */
-export function getOutputChannel(): vscode.OutputChannel {
-  return outputChannel;
 }

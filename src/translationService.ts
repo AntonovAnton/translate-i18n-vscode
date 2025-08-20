@@ -1,6 +1,6 @@
 import { ApiKeyManager } from "./apiKeyManager";
 import { URLS } from "./constants";
-import { getOutputChannel } from "./translationCommand";
+import { logInfo, logWarning } from "./logger";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
@@ -56,11 +56,7 @@ export class L10nTranslationService {
     url.searchParams.append("input", input);
     url.searchParams.append("limit", limit.toString());
 
-    getOutputChannel().appendLine(
-      `[${new Date().toISOString()}] Predicting languages for input (${
-        input.length
-      } characters)`
-    );
+    logInfo(`Predicting languages for input (${input.length} characters)`);
 
     const response = await fetch(url.toString());
 
@@ -68,10 +64,8 @@ export class L10nTranslationService {
       const error = new Error(
         `Failed to predict languages: ${response.statusText}`
       );
-      getOutputChannel().appendLine(
-        `[${new Date().toISOString()}] ERROR: Language prediction failed - ${
-          response.status
-        } ${response.statusText}`
+      logWarning(
+        `Language prediction failed - ${response.status} ${response.statusText}`
       );
       throw error;
     }
@@ -79,11 +73,7 @@ export class L10nTranslationService {
     const result: LanguagePredictionResponse =
       (await response.json()) as LanguagePredictionResponse;
 
-    getOutputChannel().appendLine(
-      `[${new Date().toISOString()}] Successfully predicted ${
-        result.languages.length
-      } languages`
-    );
+    logInfo(`Successfully predicted ${result.languages.length} languages`);
     return result.languages;
   }
 
@@ -93,11 +83,7 @@ export class L10nTranslationService {
       throw new Error("API Key not set. Please configure your API Key first.");
     }
 
-    getOutputChannel().appendLine(
-      `[${new Date().toISOString()}] Starting translation to ${
-        request.targetLanguageCode
-      }`
-    );
+    logInfo(`Starting translation to ${request.targetLanguageCode}`);
 
     const response = await fetch(`${this.baseUrl}/translate`, {
       method: "POST",
@@ -119,17 +105,11 @@ export class L10nTranslationService {
         // Ignore JSON parsing errors
       }
 
-      getOutputChannel().appendLine(
-        `[${new Date().toISOString()}] ERROR: Translation API error - ${
-          response.status
-        } ${response.statusText}`
+      logWarning(
+        `Translation API error - ${response.status} ${response.statusText}`
       );
       if (errorData) {
-        getOutputChannel().appendLine(
-          `[${new Date().toISOString()}] ERROR: API error details - ${JSON.stringify(
-            errorData
-          )}`
-        );
+        logWarning(`API error details - ${JSON.stringify(errorData)}`);
       }
 
       switch (response.status) {
@@ -189,11 +169,7 @@ export class L10nTranslationService {
     // Handle finish reasons by throwing errors
     if (result.finishReason) {
       if (result.finishReason !== FinishReason.stop) {
-        getOutputChannel().appendLine(
-          `[${new Date().toISOString()}] WARNING: Translation finished with reason: ${
-            result.finishReason
-          }`
-        );
+        logWarning(`Translation finished with reason: ${result.finishReason}`);
       }
 
       switch (result.finishReason) {
