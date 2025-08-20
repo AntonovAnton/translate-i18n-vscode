@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { ApiKeyManager } from "./apiKeyManager";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
@@ -40,46 +41,10 @@ export interface LanguagePredictionResponse {
 
 export class L10nTranslationService {
   private readonly baseUrl = "https://l10n.dev/api";
-  private readonly context: vscode.ExtensionContext;
+  private readonly apiKeyManager: ApiKeyManager;
 
-  constructor(context: vscode.ExtensionContext) {
-    this.context = context;
-  }
-
-  async getApiKey(): Promise<string | undefined> {
-    // Try to get API key from secure storage first
-    let apiKey = await this.context.secrets.get("l10n-translate-i18n.apiKey");
-
-    if (!apiKey) {
-      // Fallback to configuration (for backward compatibility)
-      apiKey = vscode.workspace
-        .getConfiguration("l10n-translate-i18n")
-        .get("apiKey");
-      if (apiKey) {
-        // Migrate to secure storage
-        await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
-        // Clear from configuration
-        await vscode.workspace
-          .getConfiguration("l10n-translate-i18n")
-          .update("apiKey", undefined, vscode.ConfigurationTarget.Global);
-      }
-    }
-
-    return apiKey;
-  }
-
-  async setApiKey(): Promise<void> {
-    const apiKey = await vscode.window.showInputBox({
-      prompt: "Enter your l10n.dev API Key",
-      placeHolder: "Get your API Key from https://l10n.dev/ws/keys",
-      password: true,
-      ignoreFocusOut: true,
-    });
-
-    if (apiKey) {
-      await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
-      vscode.window.showInformationMessage("API Key saved securely! 🔐");
-    }
+  constructor(apiKeyManager: ApiKeyManager) {
+    this.apiKeyManager = apiKeyManager;
   }
 
   async predictLanguages(
@@ -105,7 +70,7 @@ export class L10nTranslationService {
     sourceStrings: string | Record<string, any>,
     targetLanguageCode: string
   ): Promise<TranslationResult> {
-    const apiKey = await this.getApiKey();
+    const apiKey = await this.apiKeyManager.getApiKey();
     if (!apiKey) {
       throw new Error("API Key not set. Please configure your API key first.");
     }

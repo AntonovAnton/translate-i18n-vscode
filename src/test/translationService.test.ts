@@ -46,6 +46,7 @@ suite("L10nTranslationService Test Suite", () => {
   let mockContext: any;
   let mockSecrets: any;
   let mockConfiguration: any;
+  let mockApiKeyManager: any;
 
   setup(() => {
     // Reset all stubs
@@ -78,75 +79,18 @@ suite("L10nTranslationService Test Suite", () => {
     // Setup workspace configuration mock with default behavior
     vscode.workspace.getConfiguration.returns(mockConfiguration);
 
-    // Create service instance
-    service = new L10nTranslationService(mockContext);
+    // Create mock ApiKeyManager
+    mockApiKeyManager = {
+      getApiKey: sinon.stub(),
+      setApiKey: sinon.stub().resolves(),
+    };
+
+    // Create service instance with mocked ApiKeyManager
+    service = new L10nTranslationService(mockApiKeyManager);
   });
 
   teardown(() => {
     sinon.restore();
-  });
-
-  suite("API Key Management", () => {
-    test("getApiKey returns API key from secrets storage", async () => {
-      const expectedApiKey = "test-api-key-123";
-      mockSecrets.get
-        .withArgs("l10n-translate-i18n.apiKey")
-        .resolves(expectedApiKey);
-
-      const result = await service.getApiKey();
-
-      assert.strictEqual(result, expectedApiKey);
-      assert.ok(mockSecrets.get.calledWith("l10n-translate-i18n.apiKey"));
-    });
-
-    test("getApiKey returns undefined when no API key found anywhere", async () => {
-      // No API key in secrets
-      mockSecrets.get
-        .withArgs("l10n-translate-i18n.apiKey")
-        .resolves(undefined);
-
-      // No API key in configuration
-      vscode.workspace.getConfiguration
-        .withArgs("l10n-translate-i18n")
-        .returns(mockConfiguration);
-      mockConfiguration.get.withArgs("apiKey").returns(undefined);
-
-      const result = await service.getApiKey();
-
-      // The actual implementation may return empty string or undefined
-      // Both should be considered "no API key"
-      assert.ok(!result || result === "");
-    });
-
-    test.skip("setApiKey stores provided key", async () => {
-      // This test requires complex VS Code API mocking that's difficult in test environment
-      // The functionality is tested through integration testing
-      const newApiKey = "new-api-key-789";
-      vscode.window.showInputBox.resolves(newApiKey);
-      vscode.window.showInformationMessage.resolves();
-
-      await service.setApiKey();
-
-      assert.ok(
-        mockSecrets.store.calledWith("l10n-translate-i18n.apiKey", newApiKey)
-      );
-      assert.ok(
-        vscode.window.showInformationMessage.calledWith(
-          "API Key saved securely! 🔐"
-        )
-      );
-    });
-
-    test.skip("setApiKey does nothing when user cancels input", async () => {
-      // This test requires complex VS Code API mocking that's difficult in test environment
-      // The functionality is tested through integration testing
-      vscode.window.showInputBox.resolves(undefined);
-
-      await service.setApiKey();
-
-      assert.ok(mockSecrets.store.notCalled);
-      assert.ok(vscode.window.showInformationMessage.notCalled);
-    });
   });
 
   suite("Language Prediction", () => {
@@ -188,11 +132,7 @@ suite("L10nTranslationService Test Suite", () => {
 
   suite("JSON Translation", () => {
     test("translateJson throws error when no API key is set", async () => {
-      mockSecrets.get.resolves(undefined);
-      vscode.workspace.getConfiguration
-        .withArgs("l10n-translate-i18n")
-        .returns(mockConfiguration);
-      mockConfiguration.get.withArgs("apiKey").returns(undefined);
+      mockApiKeyManager.getApiKey.resolves(undefined);
 
       await assert.rejects(
         async () => await service.translateJson({}, "es"),
@@ -205,7 +145,7 @@ suite("L10nTranslationService Test Suite", () => {
       const sourceStrings = { hello: "Hello", world: "World" };
       const targetLanguage = "es";
 
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
       vscode.workspace.getConfiguration
         .withArgs("l10n-translate-i18n")
         .returns(mockConfiguration);
@@ -253,7 +193,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("translateJson handles 400 Bad Request error", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -273,7 +213,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("translateJson handles 401 Unauthorized error", async () => {
       const apiKey = "invalid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -291,7 +231,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("translateJson handles 402 Payment Required error with specific message", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -313,7 +253,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("translateJson handles 413 Request Too Large error", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -331,7 +271,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("translateJson handles 500 Internal Server Error", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -359,7 +299,7 @@ suite("L10nTranslationService Test Suite", () => {
   suite("Error Handling", () => {
     test("handles complex validation error structure", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -382,7 +322,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("handles array validation error structure", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,
@@ -402,7 +342,7 @@ suite("L10nTranslationService Test Suite", () => {
 
     test("handles JSON parsing failure in error response", async () => {
       const apiKey = "valid-api-key";
-      mockSecrets.get.resolves(apiKey);
+      mockApiKeyManager.getApiKey.resolves(apiKey);
 
       const mockErrorResponse = {
         ok: false,

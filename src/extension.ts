@@ -1,3 +1,4 @@
+import { ApiKeyManager } from "./apiKeyManager";
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
@@ -7,7 +8,8 @@ import { L10nTranslationService, FinishReason } from "./translationService";
 export function activate(context: vscode.ExtensionContext) {
   console.log("l10n.dev Translation extension is now active!");
 
-  const translationService = new L10nTranslationService(context);
+  const apiKeyManager = new ApiKeyManager(context);
+  const translationService = new L10nTranslationService(apiKeyManager);
   const i18nProjectManager = new I18nProjectManager();
 
   // Show welcome message for new users
@@ -33,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setApiKeyDisposable = vscode.commands.registerCommand(
     "l10n.translate-i18n.setApiKey",
     async () => {
-      await translationService.setApiKey();
+      await apiKeyManager.setApiKey();
     }
   );
 
@@ -54,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
     async (uri: vscode.Uri) => {
       try {
         // Ensure we have an API key
-        const apiKey = await translationService.getApiKey();
+        const apiKey = await apiKeyManager.getApiKey();
         if (!apiKey) {
           const action = await vscode.window.showWarningMessage(
             "API Key not configured. Please set your l10n.dev API key first.",
@@ -63,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
           );
 
           if (action === "Set API Key") {
-            await translationService.setApiKey();
+            await apiKeyManager.setApiKey();
             return;
           } else if (action === "Get API Key") {
             vscode.env.openExternal(
