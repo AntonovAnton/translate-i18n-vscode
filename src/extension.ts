@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { LanguageDetector } from "./languageDetector";
+import { I18nProjectManager } from "./i18nProjectManager";
 import { L10nTranslationService, FinishReason } from "./translationService";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("l10n.dev Translation extension is now active!");
 
   const translationService = new L10nTranslationService(context);
-  const languageDetector = new LanguageDetector();
+  const i18nProjectManager = new I18nProjectManager();
 
   // Show welcome message for new users
   const hasShownWelcome = context.globalState.get("hasShownWelcome", false);
@@ -84,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Detect available languages from project structure
-        const detectedLanguages = languageDetector.detectLanguagesFromProject(
+        const detectedLanguages = i18nProjectManager.detectLanguagesFromProject(
           fileUri.fsPath
         );
 
@@ -173,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
             placeHolder: 'e.g., "es", "fr", "zh-CN", "en-US"',
           });
 
-          if (languageDetector.validateLanguageCode(searchInput || "")) {
+          if (i18nProjectManager.validateLanguageCode(searchInput || "")) {
             targetLanguage = searchInput!;
           } else {
             vscode.window.showErrorMessage(
@@ -188,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Normalize target language for API call
         const normalizedTargetLanguage =
-          languageDetector.normalizeLanguageCode(targetLanguage);
+          i18nProjectManager.normalizeLanguageCode(targetLanguage);
 
         // Show progress
         await vscode.window.withProgress(
@@ -242,7 +242,7 @@ export function activate(context: vscode.ExtensionContext) {
               progress.report({ message: "Saving translated file..." });
 
               // Generate output file path using the new structure detection logic
-              const outputPath = languageDetector.generateTargetFilePath(
+              const outputPath = i18nProjectManager.generateTargetFilePath(
                 fileUri.fsPath,
                 targetLanguage
               );
