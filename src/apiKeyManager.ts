@@ -2,6 +2,9 @@ import * as vscode from "vscode";
 
 export class ApiKeyManager {
   private readonly context: vscode.ExtensionContext;
+  private readonly CONFIG_SECTION = "l10n-translate-i18n";
+  private readonly CONFIG_KEY = "apiKey";
+  private readonly SECRET_KEY = `${this.CONFIG_SECTION}.${this.CONFIG_KEY}`;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
@@ -9,20 +12,24 @@ export class ApiKeyManager {
 
   async getApiKey(): Promise<string | undefined> {
     // Try to get API key from secure storage first
-    let apiKey = await this.context.secrets.get("l10n-translate-i18n.apiKey");
+    let apiKey = await this.context.secrets.get(this.SECRET_KEY);
 
     if (!apiKey) {
       // Fallback to configuration (for backward compatibility)
       apiKey = vscode.workspace
-        .getConfiguration("l10n-translate-i18n")
-        .get("apiKey");
+        .getConfiguration(this.CONFIG_SECTION)
+        .get(this.CONFIG_KEY);
       if (apiKey) {
         // Migrate to secure storage
-        await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
+        await this.context.secrets.store(this.SECRET_KEY, apiKey);
         // Clear from configuration
         await vscode.workspace
-          .getConfiguration("l10n-translate-i18n")
-          .update("apiKey", undefined, vscode.ConfigurationTarget.Global);
+          .getConfiguration(this.CONFIG_SECTION)
+          .update(
+            this.CONFIG_KEY,
+            undefined,
+            vscode.ConfigurationTarget.Global
+          );
       }
     }
 
@@ -38,7 +45,7 @@ export class ApiKeyManager {
     });
 
     if (apiKey) {
-      await this.context.secrets.store("l10n-translate-i18n.apiKey", apiKey);
+      await this.context.secrets.store(this.SECRET_KEY, apiKey);
       vscode.window.showInformationMessage("API Key saved securely! 🔐");
     }
   }

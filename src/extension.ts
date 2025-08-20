@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { I18nProjectManager } from "./i18nProjectManager";
 import { L10nTranslationService, FinishReason } from "./translationService";
+import { LanguageSelector } from "./languageSelector";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("l10n.dev Translation extension is now active!");
@@ -11,6 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   const apiKeyManager = new ApiKeyManager(context);
   const translationService = new L10nTranslationService(apiKeyManager);
   const i18nProjectManager = new I18nProjectManager();
+  const languageSelector = new LanguageSelector(translationService);
 
   // Show welcome message for new users
   const hasShownWelcome = context.globalState.get("hasShownWelcome", false);
@@ -91,98 +93,19 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         // Let user choose target language
-        let targetLanguage: string | undefined;
-
-        if (detectedLanguages.length > 0) {
-          const options = [
-            ...detectedLanguages.map((lang) => ({
-              label: lang,
-              description: "Detected in project",
-            })),
-            {
-              label: "$(search) Search for language...",
-              description: "Type to select target language",
-            },
-          ];
-
-          const selection = await vscode.window.showQuickPick(options, {
-            placeHolder: "Select target language",
-            matchOnDescription: true,
-          });
-
-          if (!selection) {
-            return;
-          }
-
-          if (!selection.label.startsWith("$(search)")) {
-            targetLanguage = selection.label;
-          }
-        }
+        const targetLanguage = await languageSelector.selectTargetLanguage(
+          detectedLanguages
+        );
 
         if (!targetLanguage) {
-          // User wants to search for language
-          const searchInput = await vscode.window.showInputBox({
-            prompt: "Type to select target language",
-            placeHolder: 'e.g., "spanish", "es", "zh-CN"',
-          });
-
-          if (!searchInput) {
-            return;
-          }
-
-          // Predict languages using API
-          try {
-            const predictedLanguages =
-              await translationService.predictLanguages(searchInput);
-
-            if (predictedLanguages.length === 0) {
-              vscode.window.showWarningMessage(
-                "No languages found for your search."
-              );
-              return;
-            }
-
-            const languageOptions = predictedLanguages.map((lang) => ({
-              label: lang.code,
-              description: lang.name,
-            }));
-
-            const languageSelection = await vscode.window.showQuickPick(
-              languageOptions,
-              {
-                placeHolder: "Select target language",
-              }
-            );
-
-            if (!languageSelection) {
-              return;
-            }
-            targetLanguage = languageSelection.label;
-          } catch (error) {
-            vscode.window.showErrorMessage(
-              `Failed to search languages: ${
-                error instanceof Error ? error.message : "Unknown error"
-              }`
-            );
-            return;
-          }
+          return; // User cancelled language selection
         }
 
-        if (!targetLanguage) {
-          // No detected languages, ask user to input
-          const searchInput = await vscode.window.showInputBox({
-            prompt: "Enter target language code (BCP-47 format)",
-            placeHolder: 'e.g., "es", "fr", "zh-CN", "en-US"',
-          });
-
-          if (i18nProjectManager.validateLanguageCode(searchInput || "")) {
-            targetLanguage = searchInput!;
-          } else {
-            vscode.window.showErrorMessage(
-              "Invalid language code format. Please use BCP-47 format."
-            );
-            return;
-          }
+        if (i18nProjectManager.validateLanguageCode(targetLanguage)) {
+          vscode.window.showErrorMessage(
+            "Invalid language code format. Please use BCP-47 format."
+          );
+          return;
         }
 
         // Read JSON file
