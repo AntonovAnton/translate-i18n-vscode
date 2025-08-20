@@ -1,5 +1,6 @@
 import { ApiKeyManager } from "./apiKeyManager";
 import { URLS } from "./constants";
+import { getOutputChannel } from "./translationCommand";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
@@ -55,14 +56,34 @@ export class L10nTranslationService {
     url.searchParams.append("input", input);
     url.searchParams.append("limit", limit.toString());
 
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Predicting languages for input (${
+        input.length
+      } characters)`
+    );
+
     const response = await fetch(url.toString());
 
     if (!response.ok) {
-      throw new Error(`Failed to predict languages: ${response.statusText}`);
+      const error = new Error(
+        `Failed to predict languages: ${response.statusText}`
+      );
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] ERROR: Language prediction failed - ${
+          response.status
+        } ${response.statusText}`
+      );
+      throw error;
     }
 
     const result: LanguagePredictionResponse =
       (await response.json()) as LanguagePredictionResponse;
+
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Successfully predicted ${
+        result.languages.length
+      } languages`
+    );
     return result.languages;
   }
 
@@ -71,6 +92,12 @@ export class L10nTranslationService {
     if (!apiKey) {
       throw new Error("API Key not set. Please configure your API Key first.");
     }
+
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Starting translation to ${
+        request.targetLanguageCode
+      }`
+    );
 
     const response = await fetch(`${this.baseUrl}/translate`, {
       method: "POST",
@@ -92,6 +119,19 @@ export class L10nTranslationService {
         // Ignore JSON parsing errors
       }
 
+      getOutputChannel().appendLine(
+        `[${new Date().toISOString()}] ERROR: Translation API error - ${
+          response.status
+        } ${response.statusText}`
+      );
+      if (errorData) {
+        getOutputChannel().appendLine(
+          `[${new Date().toISOString()}] ERROR: API error details - ${JSON.stringify(
+            errorData
+          )}`
+        );
+      }
+
       switch (response.status) {
         case 400: {
           // Try to extract validation errors from the error response
@@ -111,7 +151,7 @@ export class L10nTranslationService {
           break;
         }
         case 401:
-          errorMessage = "Invalid API Key. Please check your API Key.";
+          errorMessage = "Unauthorized. Please check your API Key.";
           break;
         case 402: {
           // Try to extract required characters from the error response
@@ -146,8 +186,20 @@ export class L10nTranslationService {
 
     const result = (await response.json()) as TranslationResult;
 
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Translation API response received successfully`
+    );
+
     // Handle finish reasons by throwing errors
     if (result.finishReason) {
+      if (result.finishReason !== FinishReason.stop) {
+        getOutputChannel().appendLine(
+          `[${new Date().toISOString()}] WARNING: Translation finished with reason: ${
+            result.finishReason
+          }`
+        );
+      }
+
       switch (result.finishReason) {
         case FinishReason.insufficientBalance:
           throw new Error(
@@ -161,6 +213,11 @@ export class L10nTranslationService {
       }
     }
 
+    getOutputChannel().appendLine(
+      `[${new Date().toISOString()}] Translation completed successfully - ${
+        result.completedChunks
+      }/${result.totalChunks} chunks processed`
+    );
     return result;
   }
 }

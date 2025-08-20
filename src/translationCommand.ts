@@ -16,6 +16,35 @@ import { LanguageSelector } from "./languageSelector";
 
 import { CONFIG } from "./constants";
 
+// Create output channel for detailed logging
+const outputChannel = vscode.window.createOutputChannel("L10n Translation");
+
+/**
+ * Handles errors with both user notification and detailed logging
+ */
+function handleError(userMessage: string, error: unknown, context?: string) {
+  // Show user-friendly message
+  vscode.window.showErrorMessage(userMessage);
+  
+  // Log detailed error information
+  const timestamp = new Date().toISOString();
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const stackTrace = error instanceof Error ? error.stack : '';
+  
+  outputChannel.appendLine(`[${timestamp}] ERROR: ${userMessage}`);
+  if (context) {
+    outputChannel.appendLine(`Context: ${context}`);
+  }
+  outputChannel.appendLine(`Details: ${errorMessage}`);
+  if (stackTrace) {
+    outputChannel.appendLine(`Stack trace: ${stackTrace}`);
+  }
+  outputChannel.appendLine('---');
+  
+  // Also log to console for development
+  console.error(`[L10n Translation] ${userMessage}:`, error);
+}
+
 /**
  * Handles the main translate command workflow
  * Validates file, gets API Key, selects target language, and performs translation
@@ -37,7 +66,9 @@ export async function handleTranslateCommand(
     // Get the file to translate
     const fileUri = uri || vscode.window.activeTextEditor?.document.uri;
     if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
-      vscode.window.showErrorMessage("Please select a JSON file to translate.");
+      const message = "Please select a JSON file to translate.";
+      vscode.window.showErrorMessage(message);
+      outputChannel.appendLine(`[${new Date().toISOString()}] User error: ${message}`);
       return;
     }
 
@@ -56,9 +87,9 @@ export async function handleTranslateCommand(
     }
 
     if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
-      vscode.window.showErrorMessage(
-        "Invalid language code format. Please use BCP-47 format."
-      );
+      const message = "Invalid language code format. Please use BCP-47 format.";
+      vscode.window.showErrorMessage(message);
+      outputChannel.appendLine(`[${new Date().toISOString()}] Validation error: ${message} (Language: ${targetLanguage})`);
       return;
     }
 
@@ -70,8 +101,10 @@ export async function handleTranslateCommand(
       i18nProjectManager
     );
   } catch (error) {
-    vscode.window.showErrorMessage(
-      `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+    handleError(
+      `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      error,
+      "Translation command execution"
     );
   }
 }
@@ -114,7 +147,9 @@ async function performTranslation(
         const result = await translationService.translateJson(request);
 
         if (!result.translations) {
-          vscode.window.showErrorMessage("No translation results received.");
+          const message = "No translation results received.";
+          vscode.window.showErrorMessage(message);
+          outputChannel.appendLine(`[${new Date().toISOString()}] API error: ${message}`);
           return;
         }
 
@@ -132,11 +167,14 @@ async function performTranslation(
 
         // Show success message with usage info after progress completes
         await showTranslationSuccess(result, outputPath);
+        
+        // Log successful translation
+        outputChannel.appendLine(`[${new Date().toISOString()}] Translation completed successfully. File: ${path.basename(outputPath)}, Characters used: ${result.usage.charsUsed || 0}`);
       } catch (error) {
-        vscode.window.showErrorMessage(
-          `Translation failed: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
+        handleError(
+          `Translation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          error,
+          `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
         );
       }
     }
@@ -164,4 +202,12 @@ async function showTranslationSuccess(result: any, outputPath: string) {
       await vscode.window.showTextDocument(doc);
     }
   }, 100);
+}
+
+/**
+ * Gets the output channel for logging
+ * Useful for other parts of the extension that need to log information
+ */
+export function getOutputChannel(): vscode.OutputChannel {
+  return outputChannel;
 }
