@@ -15,6 +15,7 @@ suite("Translation Command Tests", () => {
     // Create mocks for all dependencies
     mockApiKeyManager = {
       getApiKey: sinon.stub(),
+      ensureApiKey: sinon.stub(),
       setApiKey: sinon.stub(),
     };
 
@@ -43,9 +44,9 @@ suite("Translation Command Tests", () => {
     sinon.restore();
   });
 
-  test("handleTranslateCommand shows error when API key is not set", async () => {
+  test("handleTranslateCommand returns early when API key is not provided", async () => {
     // Arrange
-    mockApiKeyManager.getApiKey.resolves(undefined);
+    mockApiKeyManager.ensureApiKey.resolves(undefined);
     const mockUri = { fsPath: "/test/file.json" } as vscode.Uri;
 
     // Act
@@ -58,17 +59,14 @@ suite("Translation Command Tests", () => {
     );
 
     // Assert
-    assert.ok(mockApiKeyManager.getApiKey.called);
-    assert.ok(
-      (vscode.window.showErrorMessage as sinon.SinonStub).calledWith(
-        "API Key not set. Please configure your API Key first."
-      )
-    );
+    assert.ok(mockApiKeyManager.ensureApiKey.called);
+    // Should not proceed to other operations when no API key
+    assert.ok(!mockI18nProjectManager.detectLanguagesFromProject.called);
   });
 
   test("handleTranslateCommand shows error for non-JSON files", async () => {
     // Arrange
-    mockApiKeyManager.getApiKey.resolves("test-api-key");
+    mockApiKeyManager.ensureApiKey.resolves("test-api-key");
     const mockUri = { fsPath: "/test/file.txt" } as vscode.Uri;
 
     // Act

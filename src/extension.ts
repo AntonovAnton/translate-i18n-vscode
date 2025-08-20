@@ -58,7 +58,7 @@ function setupWelcomeMessage(context: vscode.ExtensionContext) {
         if (selection === "Set API Key") {
           vscode.commands.executeCommand(COMMANDS.SET_API_KEY);
         } else if (selection === "Learn More") {
-          vscode.env.openExternal(vscode.Uri.parse(URLS.BASE));
+          vscode.env.openExternal(vscode.Uri.parse(URLS.API_KEYS));
         }
       });
     context.globalState.update(STATE_KEYS.WELCOME_SHOWN, true);

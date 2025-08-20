@@ -28,12 +28,10 @@ export async function handleTranslateCommand(
   languageSelector: LanguageSelector
 ) {
   try {
-    const apiKey = await apiKeyManager.getApiKey();
+    // Ensure we have an API key (will prompt user if needed)
+    const apiKey = await apiKeyManager.ensureApiKey();
     if (!apiKey) {
-      vscode.window.showErrorMessage(
-        "API Key not set. Please configure your API Key first."
-      );
-      return;
+      return; // User cancelled API key setup
     }
 
     // Get the file to translate
