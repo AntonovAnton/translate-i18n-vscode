@@ -5,10 +5,9 @@ AI-powered localization for VS Code. Translate i18n JSON files directly in your 
 ## Features
 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI
-- 🔐 **Secure API Key Storage**: Your API keys are stored securely using VS Code's built-in secrets manager
+- 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure
-- 🔧 **Customizable Options**: Configure contractions, and shortening
-- 📁 **Multiple Project Structures**: Supports various i18n folder structures
+- 🔧 **Customizable Options**: Configure using contractions, and shortening
 - 💰 **Free Trial**: New users get 30,000 characters free for 3 days
 
 ## Getting Started
@@ -16,13 +15,13 @@ AI-powered localization for VS Code. Translate i18n JSON files directly in your 
 ### 1. Get Your API Key
 1. Visit [l10n.dev/ws/keys](https://l10n.dev/ws/keys)
 2. Sign up for a free account
-3. Generate your API key
+3. Generate your API Key
 4. **New users get 30,000 characters free for 3 days!**
 
 ### 2. Configure the Extension
 1. Open VS Code Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 2. Run `l10n.dev: Set API Key`
-3. Paste your API key when prompted
+3. Paste your API Key when prompted
 
 ### 3. Translate Your Files
 1. Right-click on any JSON file in the Explorer or Editor
@@ -81,9 +80,10 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 
 ## Commands
 
-- `l10n.dev: Set API Key` - Configure your API key securely
-- `l10n.dev: Configure Translation Options` - Open extension settings
-- `l10n.dev: Translate JSON to...` - Translate the current JSON file
+- `Translate I18n: Set API Key` - Securely configure API Key
+- `Translate I18n: Clear API Key` - Clear API Key in VS Code secrets storage
+- `Translate I18n: Configure Translation Options` - Open extension settings
+- `Translate I18n: Translate JSON to...` - Translate JSON files
 
 ## Language Support
 
@@ -122,16 +122,15 @@ Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 
 ## Support
 
-- **Documentation**: [l10n.dev](https://l10n.dev)
-- **API Documentation**: Included in extension
-- **Issues**: Report bugs on the VS Code Marketplace
+- **API Documentation**: [l10n.dev/api/doc](https://l10n.dev/api/doc)
+- **Issues**: Report bugs on github
 
 ## Privacy & Security
 
-- API keys are stored securely using VS Code's encrypted secrets storage
+- API Keys are stored securely using VS Code's encrypted secrets storage
 - No source code or translations are stored on our servers beyond the processing time
 - All communication with l10n.dev API is encrypted (HTTPS)
 
 ---
 
-Made with ❤️ for developers who care about internationalization
+Made with ❤️ for developers who care about internationalization (i18n) and localization (l10n)

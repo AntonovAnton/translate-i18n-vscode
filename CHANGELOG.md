@@ -2,7 +2,7 @@
 
 All notable changes to the "translate-i18n" extension will be documented in this file.
 
-## [0.0.1] - 2025-08-14
+## [1.0.0] - 2025-08-22
 
 ### Added
 - ✨ **Initial Release**: AI-powered JSON translation for VS Code
@@ -10,7 +10,6 @@ All notable changes to the "translate-i18n" extension will be documented in this
 - 🎯 **Smart Language Detection**: Automatically detects target languages from project structure
   - Supports folder-based structures (`locales/en/`, `locales/fr/`)
   - Supports file-based structures (`en.json`, `fr.json`, `en-US.json`)
-  - Recognizes common i18n directory names (`locales`, `i18n`, `translations`, `lang`, `languages`)
 - 🌐 **Language Prediction**: Search and predict language codes using l10n.dev API
 - ⚙️ **Translation Options**: Configure contractions, and shortening
 - 📁 **Context Menu Integration**: "Translate JSON to..." option for JSON files in Explorer and Editor
@@ -20,7 +19,8 @@ All notable changes to the "translate-i18n" extension will be documented in this
 
 ### Features
 - **Commands**:
-  - `Translate I18n: Set API Key` - Securely configure API key
+  - `Translate I18n: Set API Key` - Securely configure API Key
+  - `Translate I18n: Clear API Key` - Clear API Key in VS Code secrets storage
   - `Translate I18n: Configure Translation Options` - Open extension settings
   - `Translate I18n: Translate JSON to...` - Translate JSON files
 
@@ -33,7 +33,6 @@ All notable changes to the "translate-i18n" extension will be documented in this
 - **Project Structure Detection**: Automatically scans for language codes in:
   - Directory names
   - JSON file names
-  - Common i18n folder structures
 
 ### Technical Implementation
 - TypeScript implementation with VS Code Extension API
@@ -45,5 +44,5 @@ All notable changes to the "translate-i18n" extension will be documented in this
 ### API Integration
 - **Language Prediction**: `GET /languages/predict`
 - **Translation**: `POST /translate`
-- **Security**: API keys stored in VS Code secrets storage
+- **Security**: API Keys stored in VS Code secrets storage
 - **Error Handling**: Proper handling of 401, 402, 413, and 500 status codes

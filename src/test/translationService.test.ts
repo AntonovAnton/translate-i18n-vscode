@@ -120,7 +120,7 @@ suite("L10nTranslationService Test Suite", () => {
   });
 
   suite("JSON Translation", () => {
-    test("translateJson throws error when no API key is set", async () => {
+    test("translateJson throws error when no API Key is set", async () => {
       mockApiKeyManager.getApiKey.resolves(undefined);
 
       await assert.rejects(
@@ -135,7 +135,7 @@ suite("L10nTranslationService Test Suite", () => {
       );
     });
 
-    test("translateJson makes correct API call with valid API key", async () => {
+    test("translateJson makes correct API call with valid API Key", async () => {
       const apiKey = "valid-api-key";
       mockApiKeyManager.getApiKey.resolves(apiKey);
 
@@ -235,7 +235,7 @@ suite("L10nTranslationService Test Suite", () => {
             useContractions: false,
             useShortening: false,
           }),
-        /Invalid API Key. Please check your API key./
+        /Unauthorized. Please check your API Key./
       );
     });
 

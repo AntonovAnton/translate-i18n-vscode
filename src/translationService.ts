@@ -111,7 +111,7 @@ export class L10nTranslationService {
           break;
         }
         case 401:
-          errorMessage = "Invalid API Key. Please check your API key.";
+          errorMessage = "Invalid API Key. Please check your API Key.";
           break;
         case 402: {
           // Try to extract required characters from the error response

@@ -18,7 +18,7 @@ import { CONFIG } from "./constants";
 
 /**
  * Handles the main translate command workflow
- * Validates file, gets API key, selects target language, and performs translation
+ * Validates file, gets API Key, selects target language, and performs translation
  */
 export async function handleTranslateCommand(
   uri: vscode.Uri,
@@ -28,10 +28,10 @@ export async function handleTranslateCommand(
   languageSelector: LanguageSelector
 ) {
   try {
-    // Ensure we have an API key (will prompt user if needed)
+    // Ensure we have an API Key (will prompt user if needed)
     const apiKey = await apiKeyManager.ensureApiKey();
     if (!apiKey) {
-      return; // User cancelled API key setup
+      return; // User cancelled API Key setup
     }
 
     // Get the file to translate
@@ -55,7 +55,7 @@ export async function handleTranslateCommand(
       return; // User cancelled language selection
     }
 
-    if (i18nProjectManager.validateLanguageCode(targetLanguage)) {
+    if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
       vscode.window.showErrorMessage(
         "Invalid language code format. Please use BCP-47 format."
       );

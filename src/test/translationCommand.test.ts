@@ -44,7 +44,7 @@ suite("Translation Command Tests", () => {
     sinon.restore();
   });
 
-  test("handleTranslateCommand returns early when API key is not provided", async () => {
+  test("handleTranslateCommand returns early when API Key is not provided", async () => {
     // Arrange
     mockApiKeyManager.ensureApiKey.resolves(undefined);
     const mockUri = { fsPath: "/test/file.json" } as vscode.Uri;
@@ -60,7 +60,7 @@ suite("Translation Command Tests", () => {
 
     // Assert
     assert.ok(mockApiKeyManager.ensureApiKey.called);
-    // Should not proceed to other operations when no API key
+    // Should not proceed to other operations when no API Key
     assert.ok(!mockI18nProjectManager.detectLanguagesFromProject.called);
   });
 

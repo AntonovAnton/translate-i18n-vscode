@@ -24,6 +24,7 @@ export const STATE_KEYS = {
 // Command constants
 export const COMMANDS = {
   SET_API_KEY: "l10n.translate-i18n.setApiKey",
+  CLEAR_API_KEY: "l10n.translate-i18n.clearApiKey",
   CONFIGURE_OPTIONS: "l10n.translate-i18n.configureOptions",
   TRANSLATE: "l10n.translate-i18n.translate",
 } as const;

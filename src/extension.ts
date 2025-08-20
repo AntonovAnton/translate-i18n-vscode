@@ -51,7 +51,7 @@ function setupWelcomeMessage(context: vscode.ExtensionContext) {
   );
   if (!hasShownWelcome) {
     const freeBalance = (30000).toLocaleString();
-    const welcomeMessage = `🎉 Welcome to l10n.dev! New users get ${freeBalance} characters free for 3 days. Get your API key from ${URLS.API_KEYS}`;
+    const welcomeMessage = `🎉 Welcome to l10n.dev! New users get ${freeBalance} characters free for 3 days. Get your API Key from ${URLS.API_KEYS}`;
     vscode.window
       .showInformationMessage(welcomeMessage, "Set API Key", "Learn More")
       .then((selection) => {
@@ -75,11 +75,27 @@ function registerCommands(
   i18nProjectManager: I18nProjectManager,
   languageSelector: LanguageSelector
 ) {
-  // Register set API key command
+  // Register set API Key command
   const setApiKeyDisposable = vscode.commands.registerCommand(
     COMMANDS.SET_API_KEY,
     async () => {
       await apiKeyManager.setApiKey();
+    }
+  );
+
+  // Register clear API Key command
+  const clearApiKeyDisposable = vscode.commands.registerCommand(
+    COMMANDS.CLEAR_API_KEY,
+    async () => {
+      const action = await vscode.window.showWarningMessage(
+        "Are you sure you want to clear your API Key? You'll need to set it again to use translation features.",
+        "Clear API Key",
+        "Cancel"
+      );
+      
+      if (action === "Clear API Key") {
+        await apiKeyManager.clearApiKey();
+      }
     }
   );
 
@@ -109,6 +125,7 @@ function registerCommands(
 
   context.subscriptions.push(
     setApiKeyDisposable,
+    clearApiKeyDisposable,
     configureOptionsDisposable,
     translateDisposable
   );

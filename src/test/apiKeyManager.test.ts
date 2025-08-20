@@ -38,11 +38,42 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
     sinon.restore();
   });
 
-  test("migrates API key from configuration to secure storage", async () => {
+  test("prefers configuration API Key over secure storage (for updates)", async () => {
+    // Arrange
+    const oldApiKey = "old-expired-key";
+    const newApiKey = "new-fresh-key";
+    mockSecrets.get.resolves(oldApiKey); // Old key in secure storage
+    mockConfiguration.get.withArgs("apiKey").returns(newApiKey); // New key in config
+    mockSecrets.store.resolves();
+    mockConfiguration.update.resolves();
+
+    // Act
+    const result = await apiKeyManager.getApiKey();
+
+    // Assert
+    assert.strictEqual(result, newApiKey);
+    assert.ok(
+      mockSecrets.store.calledWith("l10n-translate-i18n.apiKey", newApiKey)
+    );
+    assert.ok(
+      mockConfiguration.update.calledWith(
+        "apiKey",
+        undefined,
+        vscode.ConfigurationTarget.Global
+      )
+    );
+    assert.ok(
+      (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
+        "API Key updated and moved to secure storage! 🔐"
+      )
+    );
+  });
+
+  test("migrates API Key from configuration to secure storage", async () => {
     // Arrange
     const testApiKey = "test-api-key-from-config";
-    mockSecrets.get.resolves(undefined); // No API key in secure storage
-    mockConfiguration.get.withArgs("apiKey").returns(testApiKey); // API key in config
+    mockSecrets.get.resolves(undefined); // No API Key in secure storage
+    mockConfiguration.get.withArgs("apiKey").returns(testApiKey); // API Key in config
     mockSecrets.store.resolves();
     mockConfiguration.update.resolves();
 
@@ -51,35 +82,68 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
 
     // Assert
     assert.strictEqual(result, testApiKey);
-    assert.ok(mockSecrets.store.calledWith("l10n-translate-i18n.apiKey", testApiKey));
-    assert.ok(mockConfiguration.update.calledWith("apiKey", undefined, vscode.ConfigurationTarget.Global));
-    assert.ok((vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
-      "API Key migrated to secure storage for better security! 🔐"
-    ));
+    assert.ok(
+      mockSecrets.store.calledWith("l10n-translate-i18n.apiKey", testApiKey)
+    );
+    assert.ok(
+      mockConfiguration.update.calledWith(
+        "apiKey",
+        undefined,
+        vscode.ConfigurationTarget.Global
+      )
+    );
+    assert.ok(
+      (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
+        "API Key migrated to secure storage for better security! 🔐"
+      )
+    );
   });
 
-  test("returns API key from secure storage when available", async () => {
+  test("returns API Key from secure storage when available", async () => {
     // Arrange
     const testApiKey = "test-api-key-from-secrets";
-    mockSecrets.get.resolves(testApiKey); // API key in secure storage
+    mockSecrets.get.resolves(testApiKey); // API Key in secure storage
 
     // Act
     const result = await apiKeyManager.getApiKey();
 
     // Assert
     assert.strictEqual(result, testApiKey);
-    assert.ok(!mockConfiguration.get.called); // Should not check configuration
   });
 
-  test("returns undefined when no API key is found anywhere", async () => {
+  test("returns undefined when no API Key is found anywhere", async () => {
     // Arrange
-    mockSecrets.get.resolves(undefined); // No API key in secure storage
-    mockConfiguration.get.withArgs("apiKey").returns(undefined); // No API key in config
+    mockSecrets.get.resolves(undefined); // No API Key in secure storage
+    mockConfiguration.get.withArgs("apiKey").returns(undefined); // No API Key in config
 
     // Act
     const result = await apiKeyManager.getApiKey();
 
     // Assert
     assert.strictEqual(result, undefined);
+  });
+
+  test("clearApiKey removes key from both storages", async () => {
+    // Arrange
+    mockSecrets.delete = sinon.stub().resolves();
+    mockConfiguration.update.resolves();
+
+    // Act
+    await apiKeyManager.clearApiKey();
+
+    // Assert
+    assert.ok(mockSecrets.delete.calledWith("l10n-translate-i18n.apiKey"));
+    assert.ok(
+      mockConfiguration.update.calledWith(
+        "apiKey",
+        undefined,
+        vscode.ConfigurationTarget.Global
+      )
+    );
+    assert.ok(
+      (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
+        "API Key cleared. You can set a new one in the extension settings or using the 'Set API Key' command."
+      )
+    );
   });
 });

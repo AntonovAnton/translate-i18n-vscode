@@ -56,6 +56,11 @@
         "category": "Translate I18n"
       },
       {
+        "command": "l10n.translate-i18n.clearApiKey",
+        "title": "Clear API Key",
+        "category": "Translate I18n"
+      },
+      {
         "command": "l10n.translate-i18n.configureOptions",
         "title": "Configure Translation Options",
         "category": "Translate I18n"
