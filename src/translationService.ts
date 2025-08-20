@@ -186,10 +186,6 @@ export class L10nTranslationService {
 
     const result = (await response.json()) as TranslationResult;
 
-    getOutputChannel().appendLine(
-      `[${new Date().toISOString()}] Translation API response received successfully`
-    );
-
     // Handle finish reasons by throwing errors
     if (result.finishReason) {
       if (result.finishReason !== FinishReason.stop) {
@@ -213,11 +209,6 @@ export class L10nTranslationService {
       }
     }
 
-    getOutputChannel().appendLine(
-      `[${new Date().toISOString()}] Translation completed successfully - ${
-        result.completedChunks
-      }/${result.totalChunks} chunks processed`
-    );
     return result;
   }
 }

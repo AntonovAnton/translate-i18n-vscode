@@ -77,7 +77,7 @@
       "editor/context": [
         {
           "command": "l10n.translate-i18n.translate",
-          "when": "resourceExtname == .json",
+          "when": "editorLangId == json",
           "group": "navigation"
         }
       ]

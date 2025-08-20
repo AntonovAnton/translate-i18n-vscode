@@ -64,13 +64,27 @@ export async function handleTranslateCommand(
     }
 
     // Get the file to translate
-    const fileUri = uri || vscode.window.activeTextEditor?.document.uri;
+    let fileUri = uri || vscode.window.activeTextEditor?.document.uri;
+
+    // If no valid JSON file is available, prompt user to search and open one
     if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
-      const message = "Please select a JSON file to translate.";
-      vscode.window.showErrorMessage(message);
       outputChannel.appendLine(
-        `[${new Date().toISOString()}] User error: ${message}`
+        `[${new Date().toISOString()}] No selected JSON file, opening Quick Open panel`
       );
+
+      // Use VS Code's Quick Open panel (Ctrl+P equivalent)
+      await vscode.commands.executeCommand("workbench.action.quickOpen");
+
+      outputChannel.appendLine(
+        `[${new Date().toISOString()}] Quick Open panel activated for user to search files`
+      );
+
+      // Show a message to guide the user
+      vscode.window.showInformationMessage(
+        "Search for and open a JSON file, then run the translate command again.",
+        { modal: false }
+      );
+
       return;
     }
 
