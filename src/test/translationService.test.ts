@@ -131,7 +131,7 @@ suite("L10nTranslationService Test Suite", () => {
             useContractions: false,
             useShortening: false,
           }),
-        /API Key not set. Please configure your API key first./
+        /API Key not set. Please configure your API Key first./
       );
     });
 
@@ -315,12 +315,6 @@ suite("L10nTranslationService Test Suite", () => {
           }),
         /An internal server error occurred \(Error code: INTERNAL_ERROR_123\)/
       );
-    });
-
-    test.skip("translateJson uses custom configuration values", async () => {
-      // This test is skipped due to complex VS Code API mocking requirements
-      // The configuration functionality is tested indirectly in other tests
-      // and works correctly in the actual extension
     });
   });
 

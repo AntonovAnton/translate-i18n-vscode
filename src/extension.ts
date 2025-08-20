@@ -1,13 +1,13 @@
-import { ApiKeyManager } from "./apiKeyManager";
+// VS Code API imports
 import * as vscode from "vscode";
-import * as fs from "fs";
-import * as path from "path";
+
+// Local service imports
+import { ApiKeyManager } from "./apiKeyManager";
 import { I18nProjectManager } from "./i18nProjectManager";
-import {
-  L10nTranslationService,
-  TranslationRequest,
-} from "./translationService";
+import { L10nTranslationService } from "./translationService";
 import { LanguageSelector } from "./languageSelector";
+import { handleTranslateCommand } from "./translationCommand";
+
 import {
   COMMANDS,
   VSCODE_COMMANDS,
@@ -16,6 +16,10 @@ import {
   CONFIG,
 } from "./constants";
 
+/**
+ * Main extension activation function
+ * Sets up services, shows welcome message, and registers commands
+ */
 export function activate(context: vscode.ExtensionContext) {
   console.log("l10n.dev Translation extension is now active!");
 
@@ -24,18 +28,32 @@ export function activate(context: vscode.ExtensionContext) {
   const i18nProjectManager = new I18nProjectManager();
   const languageSelector = new LanguageSelector(translationService);
 
+  // Setup welcome message for new users
+  setupWelcomeMessage(context);
+
+  registerCommands(
+    context,
+    apiKeyManager,
+    translationService,
+    i18nProjectManager,
+    languageSelector
+  );
+}
+
+/**
+ * Shows welcome message for first-time users
+ */
+function setupWelcomeMessage(context: vscode.ExtensionContext) {
   // Show welcome message for new users
   const hasShownWelcome = context.globalState.get(
     STATE_KEYS.WELCOME_SHOWN,
     false
   );
   if (!hasShownWelcome) {
+    const freeBalance = (30000).toLocaleString();
+    const welcomeMessage = `🎉 Welcome to l10n.dev! New users get ${freeBalance} characters free for 3 days. Get your API key from ${URLS.API_KEYS}`;
     vscode.window
-      .showInformationMessage(
-        `🎉 Welcome to l10n.dev! New users get 30,000 characters free for 3 days. Get your API key from ${URLS.API_KEYS}`,
-        "Set API Key",
-        "Learn More"
-      )
+      .showInformationMessage(welcomeMessage, "Set API Key", "Learn More")
       .then((selection) => {
         if (selection === "Set API Key") {
           vscode.commands.executeCommand(COMMANDS.SET_API_KEY);
@@ -45,7 +63,18 @@ export function activate(context: vscode.ExtensionContext) {
       });
     context.globalState.update(STATE_KEYS.WELCOME_SHOWN, true);
   }
+}
 
+/**
+ * Registers all extension commands
+ */
+function registerCommands(
+  context: vscode.ExtensionContext,
+  apiKeyManager: ApiKeyManager,
+  translationService: L10nTranslationService,
+  i18nProjectManager: I18nProjectManager,
+  languageSelector: LanguageSelector
+) {
   // Register set API key command
   const setApiKeyDisposable = vscode.commands.registerCommand(
     COMMANDS.SET_API_KEY,
@@ -68,145 +97,14 @@ export function activate(context: vscode.ExtensionContext) {
   // Register translate command
   const translateDisposable = vscode.commands.registerCommand(
     COMMANDS.TRANSLATE,
-    async (uri: vscode.Uri) => {
-      try {
-        // Ensure we have an API key
-        const apiKey = await apiKeyManager.getApiKey();
-        if (!apiKey) {
-          const action = await vscode.window.showWarningMessage(
-            "API Key not configured. Please set your l10n.dev API key first.",
-            "Set API Key",
-            "Get API Key"
-          );
-
-          if (action === "Set API Key") {
-            await apiKeyManager.setApiKey();
-            return;
-          } else if (action === "Get API Key") {
-            vscode.env.openExternal(vscode.Uri.parse(URLS.API_KEYS));
-            return;
-          }
-          return;
-        }
-
-        // Get the file to translate
-        const fileUri = uri || vscode.window.activeTextEditor?.document.uri;
-        if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
-          vscode.window.showErrorMessage(
-            "Please select a JSON file to translate."
-          );
-          return;
-        }
-
-        // Detect available languages from project structure
-        const detectedLanguages = i18nProjectManager.detectLanguagesFromProject(
-          fileUri.fsPath
-        );
-
-        // Let user choose target language
-        const targetLanguage = await languageSelector.selectTargetLanguage(
-          detectedLanguages
-        );
-
-        if (!targetLanguage) {
-          return; // User cancelled language selection
-        }
-
-        if (i18nProjectManager.validateLanguageCode(targetLanguage)) {
-          vscode.window.showErrorMessage(
-            "Invalid language code format. Please use BCP-47 format."
-          );
-          return;
-        }
-
-        // Show progress
-        await vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: `Translating to ${targetLanguage}...`,
-            cancellable: false,
-          },
-          async (progress) => {
-            try {
-              progress.report({ message: "Sending translation request..." });
-
-              // Read JSON file
-              const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
-
-              // Normalize target language for API call
-              const normalizedTargetLanguage =
-                i18nProjectManager.normalizeLanguageCode(targetLanguage);
-
-              const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
-              const request: TranslationRequest = {
-                sourceStrings: fileContent,
-                targetLanguageCode: normalizedTargetLanguage,
-                useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
-                useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
-              };
-
-              const result = await translationService.translateJson(request);
-
-              if (!result.translations) {
-                vscode.window.showErrorMessage(
-                  "No translation results received."
-                );
-                return;
-              }
-
-              progress.report({ message: "Saving translated file..." });
-
-              // Generate output file path using the new structure detection logic
-              const outputPath = i18nProjectManager.generateTargetFilePath(
-                fileUri.fsPath,
-                targetLanguage
-              );
-
-              // Save translated file
-              const translatedContent = JSON.stringify(
-                result.translations,
-                null,
-                2
-              );
-              fs.writeFileSync(outputPath, translatedContent, "utf8");
-
-              // Progress is complete - the withProgress callback will end here
-              // and the progress notification will disappear automatically
-
-              // Show success message with usage info after progress completes
-              setTimeout(async () => {
-                const charsUsed = result.usage.charsUsed || 0;
-                const message = `✅ Translation completed! Used ${charsUsed} characters. File saved as ${path.basename(
-                  outputPath
-                )}`;
-
-                const action = await vscode.window.showInformationMessage(
-                  message,
-                  "Open File"
-                );
-
-                if (action === "Open File") {
-                  const doc = await vscode.workspace.openTextDocument(
-                    outputPath
-                  );
-                  await vscode.window.showTextDocument(doc);
-                }
-              }, 100); // Small delay to ensure progress dialog closes first
-            } catch (error) {
-              vscode.window.showErrorMessage(
-                `Translation failed: ${
-                  error instanceof Error ? error.message : "Unknown error"
-                }`
-              );
-            }
-          }
-        );
-      } catch (error) {
-        vscode.window.showErrorMessage(
-          `Error: ${error instanceof Error ? error.message : "Unknown error"}`
-        );
-      }
-    }
+    async (uri: vscode.Uri) =>
+      await handleTranslateCommand(
+        uri,
+        apiKeyManager,
+        translationService,
+        i18nProjectManager,
+        languageSelector
+      )
   );
 
   context.subscriptions.push(

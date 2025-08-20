@@ -69,7 +69,7 @@ export class L10nTranslationService {
   async translateJson(request: TranslationRequest): Promise<TranslationResult> {
     const apiKey = await this.apiKeyManager.getApiKey();
     if (!apiKey) {
-      throw new Error("API Key not set. Please configure your API key first.");
+      throw new Error("API Key not set. Please configure your API Key first.");
     }
 
     const response = await fetch(`${this.baseUrl}/translate`, {

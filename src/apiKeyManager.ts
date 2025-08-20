@@ -31,11 +31,24 @@ export class ApiKeyManager {
           );
       }
     }
+    if (!apiKey) {
+      const action = await vscode.window.showWarningMessage(
+        "API Key not configured. Please set your l10n.dev API Key first.",
+        "Set API Key",
+        "Get API Key"
+      );
+
+      if (action === "Set API Key") {
+        return await this.setApiKey();
+      } else if (action === "Get API Key") {
+        vscode.env.openExternal(vscode.Uri.parse(URLS.API_KEYS));
+      }
+    }
 
     return apiKey;
   }
 
-  async setApiKey(): Promise<void> {
+  async setApiKey(): Promise<string | undefined> {
     const apiKey = await vscode.window.showInputBox({
       prompt: "Enter your l10n.dev API Key",
       placeHolder: `Get your API Key from ${URLS.API_KEYS}`,
@@ -47,5 +60,7 @@ export class ApiKeyManager {
       await this.context.secrets.store(this.SECRET_KEY, apiKey);
       vscode.window.showInformationMessage("API Key saved securely! 🔐");
     }
+
+    return apiKey;
   }
 }
