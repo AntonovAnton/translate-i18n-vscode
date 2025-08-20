@@ -17,7 +17,7 @@ import { LanguageSelector } from "./languageSelector";
 import { CONFIG } from "./constants";
 
 // Create output channel for detailed logging
-const outputChannel = vscode.window.createOutputChannel("L10n Translation");
+const outputChannel = vscode.window.createOutputChannel("Translate i18n JSON");
 
 /**
  * Handles errors with both user notification and detailed logging
@@ -25,12 +25,12 @@ const outputChannel = vscode.window.createOutputChannel("L10n Translation");
 function handleError(userMessage: string, error: unknown, context?: string) {
   // Show user-friendly message
   vscode.window.showErrorMessage(userMessage);
-  
+
   // Log detailed error information
   const timestamp = new Date().toISOString();
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const stackTrace = error instanceof Error ? error.stack : '';
-  
+  const stackTrace = error instanceof Error ? error.stack : "";
+
   outputChannel.appendLine(`[${timestamp}] ERROR: ${userMessage}`);
   if (context) {
     outputChannel.appendLine(`Context: ${context}`);
@@ -39,10 +39,10 @@ function handleError(userMessage: string, error: unknown, context?: string) {
   if (stackTrace) {
     outputChannel.appendLine(`Stack trace: ${stackTrace}`);
   }
-  outputChannel.appendLine('---');
-  
+  outputChannel.appendLine("---");
+
   // Also log to console for development
-  console.error(`[L10n Translation] ${userMessage}:`, error);
+  console.error(`[Translate i18n JSON] ${userMessage}:`, error);
 }
 
 /**
@@ -68,7 +68,9 @@ export async function handleTranslateCommand(
     if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
       const message = "Please select a JSON file to translate.";
       vscode.window.showErrorMessage(message);
-      outputChannel.appendLine(`[${new Date().toISOString()}] User error: ${message}`);
+      outputChannel.appendLine(
+        `[${new Date().toISOString()}] User error: ${message}`
+      );
       return;
     }
 
@@ -89,7 +91,9 @@ export async function handleTranslateCommand(
     if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
       const message = "Invalid language code format. Please use BCP-47 format.";
       vscode.window.showErrorMessage(message);
-      outputChannel.appendLine(`[${new Date().toISOString()}] Validation error: ${message} (Language: ${targetLanguage})`);
+      outputChannel.appendLine(
+        `[${new Date().toISOString()}] Validation error: ${message} (Language: ${targetLanguage})`
+      );
       return;
     }
 
@@ -149,7 +153,9 @@ async function performTranslation(
         if (!result.translations) {
           const message = "No translation results received.";
           vscode.window.showErrorMessage(message);
-          outputChannel.appendLine(`[${new Date().toISOString()}] API error: ${message}`);
+          outputChannel.appendLine(
+            `[${new Date().toISOString()}] API error: ${message}`
+          );
           return;
         }
 
@@ -167,12 +173,18 @@ async function performTranslation(
 
         // Show success message with usage info after progress completes
         await showTranslationSuccess(result, outputPath);
-        
+
         // Log successful translation
-        outputChannel.appendLine(`[${new Date().toISOString()}] Translation completed successfully. File: ${path.basename(outputPath)}, Characters used: ${result.usage.charsUsed || 0}`);
+        outputChannel.appendLine(
+          `[${new Date().toISOString()}] Translation completed successfully. File: ${path.basename(
+            outputPath
+          )}, Characters used: ${result.usage.charsUsed || 0}`
+        );
       } catch (error) {
         handleError(
-          `Translation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          `Translation failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
           error,
           `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
         );
