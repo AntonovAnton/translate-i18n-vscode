@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "translate-i18n" extension will be documented in this file.
+All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
 
 ## [1.0.0] - 2025-08-22
 

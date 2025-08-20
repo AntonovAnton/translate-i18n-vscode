@@ -73,7 +73,7 @@ For projects that don't match the above patterns, the extension falls back to sa
 
 ## Configuration Options
 
-Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10n"):
+Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10n-translate-i18n"):
 
 - **Use Contractions**: Makes translations less formal (default: true)
 - **Use Shortening**: Uses shortened forms if translation is longer than source (default: false)
