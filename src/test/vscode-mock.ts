@@ -3,7 +3,7 @@ export const vscode = {
   window: {
     showInformationMessage: () => Promise.resolve(),
     showErrorMessage: () => Promise.resolve(),
-    showInputBox: () => Promise.resolve(''),
+    showInputBox: () => Promise.resolve(""),
     showQuickPick: () => Promise.resolve(),
     createQuickPick: () => ({
       items: [],
@@ -11,35 +11,35 @@ export const vscode = {
       onDidHide: () => ({ dispose: () => {} }),
       show: () => {},
       hide: () => {},
-      dispose: () => {}
-    })
+      dispose: () => {},
+    }),
   },
   commands: {
     registerCommand: () => ({ dispose: () => {} }),
-    executeCommand: () => Promise.resolve()
+    executeCommand: () => Promise.resolve(),
   },
   workspace: {
     getConfiguration: () => ({
       get: () => undefined,
-      update: () => Promise.resolve()
+      update: () => Promise.resolve(),
     }),
-    workspaceFolders: []
+    workspaceFolders: [],
   },
   env: {
-    openExternal: () => Promise.resolve()
+    openExternal: () => Promise.resolve(),
   },
   Uri: {
-    parse: (uri: string) => ({ toString: () => uri })
+    parse: (uri: string) => ({ toString: () => uri }),
   },
   ExtensionContext: class {
     globalState = {
       get: () => false,
-      update: () => Promise.resolve()
+      update: () => Promise.resolve(),
     };
     secrets = {
       get: () => Promise.resolve(undefined),
       store: () => Promise.resolve(),
-      delete: () => Promise.resolve()
+      delete: () => Promise.resolve(),
     };
-  }
+  },
 };
