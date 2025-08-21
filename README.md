@@ -1,14 +1,18 @@
-# Translate I18n JSON by l10n.dev
+# VS Code Extension - Translate I18n JSON by l10n.dev
 
-AI-powered localization for VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
+AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
 
 ## Features
 
-- 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI
-- 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager
-- 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure
-- 🔧 **Customizable Options**: Configure using contractions, and shortening
-- 💰 **Free Trial**: New users get 30,000 characters free for 3 days
+- 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI.
+- 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not") and enable shortening when translations exceed source text length.
+- 🛠️ **Developer-Friendly Features**: Preserves placeholders, HTML tags, and formatting while adapting dates and numbers to target locales. Intelligently avoids translating things that shouldn't be translated (proper names, urls, technical terms, etc.). Learn more in this article: [i18n vs l10n: Why Developers Should Care and How AI Can Help](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17).
+- 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
+- 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
+- 🌐 **i18next Support**: Works seamlessly with i18next and other common i18n formats.
+- 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
+- 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding ~16,000 characters can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
+- 💰 **Free Trial**: New users get 30,000 characters free for 3 days.
 
 ## Getting Started
 
@@ -134,3 +138,10 @@ Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 ---
 
 Made with ❤️ for developers who care about internationalization (i18n) and localization (l10n)
+
+---
+> **Tip:** For translating a large number of files, use the [I18N File Translation UI on l10n.dev](https://l10n.dev/ws/translate-i18n-files). The VS Code extension translates files in real time via the [Translate JSON API](https://l10n.dev/api/doc/#tag/json-translation) and does not store your JSON or translations on our servers. For very large files, translation may take several minutes and delivery cannot be guaranteed in all cases.
+>
+> On the l10n.dev platform, you can securely create translation jobs for batch processing, set custom terminology, monitor progress in real time, and download your files when complete. You have full control: files can be deleted at any time. For automation and CI/CD workflows, our API lets you integrate localization seamlessly into your pipelines.
+>
+> l10n.dev is built by developers for developers, with privacy, reliability, and quality as top priorities.
