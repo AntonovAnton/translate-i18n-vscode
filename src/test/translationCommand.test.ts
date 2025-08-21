@@ -83,6 +83,10 @@ suite("Translation Command Tests", () => {
       (vscode.window.showErrorMessage as sinon.SinonStub).calledWith(
         "Please select a JSON file to translate."
       )
+    assert.ok(
+      (vscode.commands.executeCommand as sinon.SinonStub).calledWith(
+        "workbench.action.quickOpen"
+      )
     );
   });
 });
