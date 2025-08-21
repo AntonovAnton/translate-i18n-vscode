@@ -36,7 +36,15 @@ export class ApiKeyManager {
 
       vscode.window.showInformationMessage(
         "API Key migrated to secure storage for better security! 🔐"
-      );
+      if (secureApiKey) {
+        vscode.window.showInformationMessage(
+          "API Key updated securely! 🔐"
+        );
+      } else {
+        vscode.window.showInformationMessage(
+          "API Key migrated to secure storage for better security! 🔐"
+        );
+      }
 
       logInfo("API Key migrated to secure storage");
 
