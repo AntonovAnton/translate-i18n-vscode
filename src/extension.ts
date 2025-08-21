@@ -53,11 +53,11 @@ function setupWelcomeMessage(context: vscode.ExtensionContext) {
     const freeBalance = (30000).toLocaleString();
     const welcomeMessage = `🎉 Welcome to l10n.dev! New users get ${freeBalance} characters free for 3 days. Get your API Key from ${URLS.API_KEYS}`;
     vscode.window
-      .showInformationMessage(welcomeMessage, "Set API Key", "Learn More")
+      .showInformationMessage(welcomeMessage, "Set API Key", "Get API Key")
       .then((selection) => {
         if (selection === "Set API Key") {
           vscode.commands.executeCommand(COMMANDS.SET_API_KEY);
-        } else if (selection === "Learn More") {
+        } else if (selection === "Get API Key") {
           vscode.env.openExternal(vscode.Uri.parse(URLS.API_KEYS));
         }
       });

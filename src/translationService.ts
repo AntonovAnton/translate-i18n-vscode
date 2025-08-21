@@ -1,6 +1,6 @@
 import { ApiKeyManager } from "./apiKeyManager";
 import { URLS } from "./constants";
-import { logInfo, logWarning } from "./logger";
+import { logInfo, logWarning, showAndLogError } from "./logger";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
@@ -77,7 +77,9 @@ export class L10nTranslationService {
     return result.languages;
   }
 
-  async translateJson(request: TranslationRequest): Promise<TranslationResult> {
+  async translateJson(
+    request: TranslationRequest
+  ): Promise<TranslationResult | null> {
     const apiKey = await this.apiKeyManager.getApiKey();
     if (!apiKey) {
       throw new Error("API Key not set. Please configure your API Key first.");
@@ -136,16 +138,22 @@ export class L10nTranslationService {
         case 402: {
           // Try to extract required characters from the error response
           let message =
-            "Insufficient balance. Please top up your account to continue translating.";
+            "Not enough characters remaining for this translation. You can try translating a smaller portion of your file or purchase more characters.";
           const requiredCharactersForTranslation = errorData?.data
             ?.requiredCharactersForTranslation as number;
           if (requiredCharactersForTranslation) {
             const requiredChars =
               requiredCharactersForTranslation.toLocaleString();
-            message = `Insufficient balance. You need ${requiredChars} characters to proceed with the translation. Please visit ${URLS.PRICING} to purchase more characters.`;
+            message = `This translation requires ${requiredChars} characters. You can try translating a smaller portion of your file or visit l10n.dev to purchase more characters.`;
           }
-          errorMessage = message;
-          break;
+          showAndLogError(
+            message,
+            errorData,
+            "",
+            "Visit l10n.dev",
+            URLS.PRICING
+          );
+          return null;
         }
         case 413:
           errorMessage = "Request too large. Maximum request size is 10 MB.";
@@ -173,9 +181,15 @@ export class L10nTranslationService {
 
       switch (result.finishReason) {
         case FinishReason.insufficientBalance:
-          throw new Error(
-            `Insufficient balance. Please visit ${URLS.PRICING} to purchase more characters.`
+          const message = `Not enough characters remaining for this translation. You can try translating a smaller portion of your file or purchase more characters.`;
+          showAndLogError(
+            message,
+            undefined,
+            "",
+            "Visit l10n.dev",
+            URLS.PRICING
           );
+          return null;
         case FinishReason.contentFilter:
           throw new Error("Translation blocked by content filter.");
         case FinishReason.error:

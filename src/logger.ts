@@ -8,11 +8,19 @@ const outputChannel = vscode.window.createOutputChannel("Translate i18n JSON");
  */
 export function showAndLogError(
   userMessage: string,
-  error: unknown,
-  context?: string
+  error?: unknown,
+  context?: string,
+  linkBtnText?: string,
+  url?: string
 ) {
   // Show user-friendly message
-  vscode.window.showErrorMessage(userMessage);
+  const learnMoreText = linkBtnText || "Learn More";
+  const options = url ? [learnMoreText] : [];
+  vscode.window.showErrorMessage(userMessage, ...options).then((selection) => {
+    if (selection === learnMoreText) {
+      vscode.env.openExternal(vscode.Uri.parse(url!));
+    }
+  });
 
   // Log detailed error information
   const timestamp = new Date().toISOString();
@@ -36,7 +44,7 @@ export function showAndLogError(
  */
 export function logInfo(message: string) {
   const timestamp = new Date().toISOString();
-  outputChannel.appendLine(`[${timestamp}] ${message}`);
+  outputChannel.appendLine(`[${timestamp}] INFO: ${message}`);
 }
 
 /**

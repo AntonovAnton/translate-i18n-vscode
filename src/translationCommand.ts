@@ -129,11 +129,16 @@ async function performTranslation(
         };
 
         const result = await translationService.translateJson(request);
+        if (!result) {
+          logInfo(`Translation failed for file: ${fileUri.fsPath}`);
+          return;
+        }
 
         if (!result.translations) {
-          const message = "No translation results received.";
-          vscode.window.showErrorMessage(message);
-          logInfo(`API error: ${message}`);
+          const message =
+            "No translation results received. Please verify that source file contains content.";
+          vscode.window.showInformationMessage(message);
+          logInfo(message);
           return;
         }
 

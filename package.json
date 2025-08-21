@@ -6,6 +6,7 @@
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
+  "pricing": "Trial",
   "author": {
     "name": "Anton Antonov",
     "email": "support@l10n.dev",

@@ -255,16 +255,15 @@ suite("L10nTranslationService Test Suite", () => {
 
       mockFetch.resolves(mockErrorResponse);
 
-      await assert.rejects(
-        async () =>
-          await service.translateJson({
-            sourceStrings: {},
-            targetLanguageCode: "es",
-            useContractions: false,
-            useShortening: false,
-          }),
-        /Insufficient balance. You need 1,000 characters to proceed/
-      );
+      const result = await service.translateJson({
+        sourceStrings: {},
+        targetLanguageCode: "es",
+        useContractions: false,
+        useShortening: false,
+      });
+
+      // 402 errors now return null instead of throwing
+      assert.strictEqual(result, null);
     });
 
     test("translateJson handles 413 Request Too Large error", async () => {
@@ -400,7 +399,7 @@ suite("L10nTranslationService Test Suite", () => {
   });
 
   suite("Finish Reason Handling", () => {
-    test("throws error for insufficientBalance finish reason", async () => {
+    test("handles insufficientBalance finish reason", async () => {
       const apiKey = "valid-api-key";
       mockApiKeyManager.getApiKey.resolves(apiKey);
 
@@ -418,16 +417,15 @@ suite("L10nTranslationService Test Suite", () => {
 
       mockFetch.resolves(mockResponse);
 
-      await assert.rejects(
-        async () =>
-          await service.translateJson({
-            sourceStrings: {},
-            targetLanguageCode: "es",
-            useContractions: false,
-            useShortening: false,
-          }),
-        /Insufficient balance\. Please visit .* to purchase more characters\./
-      );
+      const result = await service.translateJson({
+        sourceStrings: {},
+        targetLanguageCode: "es",
+        useContractions: false,
+        useShortening: false,
+      });
+
+      // insufficientBalance finish reason now returns null instead of throwing
+      assert.strictEqual(result, null);
     });
 
     test("throws error for contentFilter finish reason", async () => {
