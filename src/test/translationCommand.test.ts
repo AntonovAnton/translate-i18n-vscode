@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 // Import the translation command handler
 import { handleTranslateCommand } from "../translationCommand";
+import { VSCODE_COMMANDS } from "../constants";
 
 suite("Translation Command Tests", () => {
   let mockApiKeyManager: any;
@@ -82,7 +83,7 @@ suite("Translation Command Tests", () => {
     // Assert
     assert.ok(
       (vscode.commands.executeCommand as sinon.SinonStub).calledWith(
-        "workbench.action.quickOpen"
+        VSCODE_COMMANDS.QUICK_OPEN
       )
     );
     assert.ok(

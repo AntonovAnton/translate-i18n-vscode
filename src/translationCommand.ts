@@ -15,7 +15,7 @@ import {
 import { LanguageSelector } from "./languageSelector";
 import { showAndLogError, logInfo } from "./logger";
 
-import { CONFIG } from "./constants";
+import { CONFIG, VSCODE_COMMANDS } from "./constants";
 
 /**
  * Handles the main translate command workflow
@@ -43,7 +43,7 @@ export async function handleTranslateCommand(
       logInfo("No selected JSON file, opening Quick Open panel");
 
       // Use VS Code's Quick Open panel (Ctrl+P equivalent)
-      await vscode.commands.executeCommand("workbench.action.quickOpen");
+      await vscode.commands.executeCommand(VSCODE_COMMANDS.QUICK_OPEN);
 
       logInfo("Quick Open panel activated for user to search files");
 

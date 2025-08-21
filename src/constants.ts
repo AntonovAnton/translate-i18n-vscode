@@ -32,4 +32,5 @@ export const COMMANDS = {
 // VS Code built-in commands
 export const VSCODE_COMMANDS = {
   OPEN_SETTINGS: "workbench.action.openSettings",
+  QUICK_OPEN: "workbench.action.quickOpen",
 } as const;
