@@ -137,18 +137,9 @@ export class L10nTranslationService {
           // Try to extract required characters from the error response
           let message =
             "Insufficient balance. Please top up your account to continue translating.";
-          if (
-            errorData?.data?.requiredCharactersForTranslation &&
-            typeof errorData.data.requiredCharactersForTranslation === "number"
-          ) {
-            const requiredChars =
-              errorData.data.requiredCharactersForTranslation.toLocaleString();
-            message = `Insufficient balance. You need ${requiredChars} characters to proceed with the translation. Please visit ${URLS.PRICING} to purchase more characters.`;
-          const requiredCharactersForTranslation = errorData?.data?.requiredCharactersForTranslation;
-          if (
-            requiredCharactersForTranslation &&
-            typeof requiredCharactersForTranslation === "number"
-          ) {
+          const requiredCharactersForTranslation = errorData?.data
+            ?.requiredCharactersForTranslation as number;
+          if (requiredCharactersForTranslation) {
             const requiredChars =
               requiredCharactersForTranslation.toLocaleString();
             message = `Insufficient balance. You need ${requiredChars} characters to proceed with the translation. Please visit ${URLS.PRICING} to purchase more characters.`;

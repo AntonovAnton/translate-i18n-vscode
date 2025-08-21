@@ -38,6 +38,7 @@ suite("Translation Command Tests", () => {
     sinon.stub(vscode.window, "showErrorMessage");
     sinon.stub(vscode.window, "showInformationMessage");
     sinon.stub(vscode.window, "withProgress");
+    sinon.stub(vscode.commands, "executeCommand");
   });
 
   teardown(() => {
@@ -80,12 +81,13 @@ suite("Translation Command Tests", () => {
 
     // Assert
     assert.ok(
-      (vscode.window.showErrorMessage as sinon.SinonStub).calledWith(
-        "Please select a JSON file to translate."
-      )
-    assert.ok(
       (vscode.commands.executeCommand as sinon.SinonStub).calledWith(
         "workbench.action.quickOpen"
+      )
+    );
+    assert.ok(
+      (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
+        "Search for and open a JSON file, then run the translate command again."
       )
     );
   });

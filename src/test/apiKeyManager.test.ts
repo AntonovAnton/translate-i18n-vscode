@@ -64,7 +64,7 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
     );
     assert.ok(
       (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
-        "API Key updated and moved to secure storage! 🔐"
+        "API Key updated securely! 🔐"
       )
     );
   });
