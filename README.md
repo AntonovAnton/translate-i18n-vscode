@@ -87,7 +87,7 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 - `Translate I18n: Set API Key` - Securely configure API Key
 - `Translate I18n: Clear API Key` - Clear API Key in VS Code secrets storage
 - `Translate I18n: Configure Translation Options` - Open extension settings
-- `Translate I18n: Translate JSON to...` - Translate JSON files
+- `Translate I18n: Translate JSON to...` - Translate JSON file
 
 ## Language Support
 
@@ -140,7 +140,7 @@ Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 Made with ❤️ for developers who care about internationalization (i18n) and localization (l10n)
 
 ---
-> **Tip:** For translating a large number of files, use the [I18N File Translation UI on l10n.dev](https://l10n.dev/ws/translate-i18n-files). The VS Code extension translates files in real time via the [Translate JSON API](https://l10n.dev/api/doc/#tag/json-translation) and does not store your JSON or translations on our servers. For very large files, translation may take several minutes and delivery cannot be guaranteed in all cases.
+> **Tip:** For translating a large number of files, use the [I18N File Translation UI](https://l10n.dev/ws/translate-i18n-files) on l10n.dev. The VS Code extension translates files in real time via the [Translate JSON API](https://l10n.dev/api/doc/#tag/json-translation) and does not store your JSON or translations on our servers. For very large files, translation may take several minutes and delivery cannot be guaranteed in all cases.
 >
 > On the l10n.dev platform, you can securely create translation jobs for batch processing, set custom terminology, monitor progress in real time, and download your files when complete. You have full control: files can be deleted at any time. For automation and CI/CD workflows, our API lets you integrate localization seamlessly into your pipelines.
 >
