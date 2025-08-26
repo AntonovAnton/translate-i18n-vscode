@@ -1,3 +1,5 @@
+<img src="images/icon.png" alt="l10n.dev" style="width:64px;height:64px;"/>
+
 # Translate I18n JSON by l10n.dev
 
 AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
