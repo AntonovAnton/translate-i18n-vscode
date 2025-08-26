@@ -13,7 +13,7 @@ Usage of l10n.dev service:
 --------------------------
 This extension connects to the l10n.dev platform, which provides AI-powered translation
 for internationalization (i18n) files. The l10n.dev backend service is proprietary
-and not covered by the AGPL license. A valid l10n.dev account and API Key are required
+and not covered by the AGPL license. A valid l10n.dev account and API key are required
 to use the translation features of this extension.
 
 You may freely use, modify, and distribute this extension under the terms of AGPLv3.

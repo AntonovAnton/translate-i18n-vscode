@@ -2,7 +2,7 @@
 
 All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
 
-## [1.0.0] - 2025-08-22
+## [1.0.0] - 2025-08-26
 
 ### Added
 - ✨ **Initial Release**: AI-powered JSON translation for VS Code

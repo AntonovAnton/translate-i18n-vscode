@@ -62,7 +62,7 @@ export class ApiKeyManager {
 
     if (!apiKey) {
       const action = await vscode.window.showWarningMessage(
-        "API Key not configured. Please set your l10n.dev API Key first.",
+        "API Key not configured. Please set your l10n.dev API key first.",
         "Set API Key",
         "Get API Key"
       );

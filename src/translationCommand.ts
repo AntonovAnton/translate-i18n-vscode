@@ -11,6 +11,7 @@ import { I18nProjectManager } from "./i18nProjectManager";
 import {
   L10nTranslationService,
   TranslationRequest,
+  TranslationResult,
 } from "./translationService";
 import { LanguageSelector } from "./languageSelector";
 import { showAndLogError, logInfo } from "./logger";
@@ -180,7 +181,10 @@ async function performTranslation(
 /**
  * Shows translation success message with usage stats and option to open result file
  */
-async function showTranslationSuccess(result: any, outputPath: string) {
+async function showTranslationSuccess(
+  result: TranslationResult,
+  outputPath: string
+) {
   // Small delay to ensure progress dialog closes first
   setTimeout(async () => {
     const charsUsed = result.usage.charsUsed || 0;

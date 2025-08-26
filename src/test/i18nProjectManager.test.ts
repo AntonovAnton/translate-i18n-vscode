@@ -4,9 +4,10 @@ import * as fs from "fs";
 import * as os from "os";
 
 // Import the I18nProjectManager and related types
-const i18nProjectManagerModule = require("../i18nProjectManager");
-const I18nProjectManager = i18nProjectManagerModule.I18nProjectManager;
-const ProjectStructureType = i18nProjectManagerModule.ProjectStructureType;
+import {
+  I18nProjectManager,
+  ProjectStructureType,
+} from "../i18nProjectManager";
 
 suite("I18nProjectManager Test Suite", () => {
   let tempDir: string;
