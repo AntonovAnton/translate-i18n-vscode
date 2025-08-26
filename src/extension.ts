@@ -51,7 +51,7 @@ function setupWelcomeMessage(context: vscode.ExtensionContext) {
   );
   if (!hasShownWelcome) {
     const freeBalance = (30000).toLocaleString();
-    const welcomeMessage = `🎉 Welcome to l10n.dev! New users get ${freeBalance} characters free for 3 days. Get your API Key from ${URLS.API_KEYS}`;
+    const welcomeMessage = `🎉 Welcome to l10n.dev! Users get ${freeBalance} characters free monthly. Get your API Key from ${URLS.API_KEYS}`;
     vscode.window
       .showInformationMessage(welcomeMessage, "Set API Key", "Get API Key")
       .then((selection) => {

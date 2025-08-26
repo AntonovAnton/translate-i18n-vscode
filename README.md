@@ -1,4 +1,4 @@
-# VS Code Extension - Translate I18n JSON by l10n.dev
+# Translate I18n JSON by l10n.dev
 
 AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
 
@@ -12,7 +12,7 @@ AI-powered localization in VS Code. Translate i18n JSON files directly in your e
 - 🌐 **i18next Support**: Works seamlessly with i18next and other common i18n formats.
 - 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding ~16,000 characters can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
-- 💰 **Free Trial**: New users get 30,000 characters free for 3 days.
+- 💰 **Free**: Users get 30,000 characters free monthly.
 
 ## Getting Started
 
@@ -20,7 +20,6 @@ AI-powered localization in VS Code. Translate i18n JSON files directly in your e
 1. Visit [l10n.dev/ws/keys](https://l10n.dev/ws/keys)
 2. Sign up for a free account
 3. Generate your API Key
-4. **New users get 30,000 characters free for 3 days!**
 
 ### 2. Configure the Extension
 1. Open VS Code Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
@@ -98,7 +97,7 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 
 ## Pricing
 
-- **Free Trial**: 30,000 characters for 3 days (new users)
+- **Free Characters**: 30,000 characters for free monthly
 - **Pay-as-you-go**: Affordable character-based pricing
 - **No subscription required**
 

@@ -126,6 +126,7 @@ async function performTranslation(
           targetLanguageCode: normalizedTargetLanguage,
           useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
           useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
+          client: "vscode-extension",
         };
 
         const result = await translationService.translateJson(request);

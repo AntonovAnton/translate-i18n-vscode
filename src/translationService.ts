@@ -8,6 +8,7 @@ export interface TranslationRequest {
   targetLanguageCode: string;
   useContractions?: boolean;
   useShortening?: boolean;
+  client: string;
 }
 
 export interface TranslationResult {
@@ -139,13 +140,14 @@ export class L10nTranslationService {
           // Try to extract required characters from the error response
           let message =
             "Not enough characters remaining for this translation. You can try translating a smaller portion of your file or purchase more characters.";
-          const requiredCharactersForTranslation = errorData?.data
-            ?.requiredCharactersForTranslation as number;
-          if (requiredCharactersForTranslation) {
-            const requiredChars =
-              requiredCharactersForTranslation.toLocaleString();
-            message = `This translation requires ${requiredChars} characters. You can try translating a smaller portion of your file or visit l10n.dev to purchase more characters.`;
+
+          const requiredBalance = errorData?.data?.requiredBalance as number;
+          if (requiredBalance) {
+            const currentBalance =
+              (errorData?.data?.currentBalance as number) ?? 0;
+            message = `This translation requires ${requiredBalance.toLocaleString()} characters, but you only have ${currentBalance.toLocaleString()} characters available. You can try translating a smaller portion of your file or purchase more characters.`;
           }
+
           showAndLogError(
             message,
             errorData,

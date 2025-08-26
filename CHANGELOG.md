@@ -15,7 +15,7 @@ All notable changes to the "Translate I18n JSON by l10n.dev" extension will be d
 - 📁 **Context Menu Integration**: "Translate JSON to..." option for JSON files in Explorer and Editor
 - 📊 **Usage Tracking**: Shows character usage and translation details
 - 🚨 **Error Handling**: Comprehensive error messages for different scenarios
-- 💰 **Free Trial Promotion**: Informs new users about 30,000 free characters
+- 💰 **Free Characters Promotion**: Informs new users about 30,000 free characters
 
 ### Features
 - **Commands**:
