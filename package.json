@@ -1,0 +1,139 @@
+{
+  "name": "translate-i18n",
+  "displayName": "Translate I18n JSON by l10n.dev",
+  "description": "Translate i18n JSON files with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
+  "version": "1.0.0",
+  "publisher": "l10n-dev",
+  "license": "AGPL-3.0-only",
+  "icon": "images/icon.png",
+  "pricing": "Free",
+  "author": {
+    "name": "Anton Antonov",
+    "email": "support@l10n.dev",
+    "url": "https://l10n.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AntonovAnton/translate-i18n-vscode.git"
+  },
+  "homepage": "https://l10n.dev",
+  "bugs": {
+    "url": "https://github.com/AntonovAnton/translate-i18n-vscode/issues"
+  },
+  "keywords": [
+    "translation",
+    "i18n",
+    "i18next",
+    "internationalization",
+    "auto-translate-json",
+    "localization",
+    "l10n",
+    "ai",
+    "json",
+    "multilingual"
+  ],
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "categories": [
+    "Formatters",
+    "AI",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:json"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "l10n.translate-i18n.translate",
+        "title": "Translate JSON to...",
+        "category": "Translate I18n"
+      },
+      {
+        "command": "l10n.translate-i18n.setApiKey",
+        "title": "Set API Key",
+        "category": "Translate I18n"
+      },
+      {
+        "command": "l10n.translate-i18n.clearApiKey",
+        "title": "Clear API Key",
+        "category": "Translate I18n"
+      },
+      {
+        "command": "l10n.translate-i18n.configureOptions",
+        "title": "Configure Translation Options",
+        "category": "Translate I18n"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "l10n.translate-i18n.translate",
+          "when": "resourceExtname == .json",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "l10n.translate-i18n.translate",
+          "when": "editorLangId == json",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Translate I18n JSON by l10n.dev",
+      "description": "Settings for the Translate I18n JSON by l10n.dev extension",
+      "properties": {
+        "l10n-translate-i18n.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for l10n.dev service (stored securely in VS Code secrets)",
+          "scope": "machine"
+        },
+        "l10n-translate-i18n.useContractions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use grammar contractions (makes translation less formal)"
+        },
+        "l10n-translate-i18n.useShortening": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use shortened forms if translation is longer than source text"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.102.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.32.0",
+    "mocha": "^10.0.0",
+    "npm-run-all": "^4.1.5",
+    "sinon": "^21.0.0",
+    "typescript": "^5.9.2"
+  }
+}
