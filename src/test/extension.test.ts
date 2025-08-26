@@ -7,7 +7,7 @@ suite("Extension Test Suite", () => {
   // Basic extension tests can be added here
   test("extension should be present", () => {
     // The extension should be loaded in the test environment
-    const extension = vscode.extensions.getExtension("l10n-dev.translate-i18n");
+    const extension = vscode.extensions.getExtension("l10n-dev.translate-i18n-json");
     if (extension) {
       assert.ok(extension);
     } else {
