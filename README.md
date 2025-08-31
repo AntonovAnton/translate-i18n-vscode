@@ -1,8 +1,10 @@
-<img src="images/icon.png" alt="l10n.dev" style="width:64px;height:64px;"/>
+<img src="images/logo-l10n-151x64.jpg" alt="l10n.dev" height=64 style="width:151px;height:64px;"/>
 
 # Translate I18n JSON by l10n.dev
 
 AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
+
+<img src="images/vs-code-extension-demonstration.jpg" alt="One click localization in VS Code">
 
 ## Features
 
@@ -99,11 +101,9 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 
 ## Pricing
 
-- **Free Characters**: 30,000 characters for free monthly
-- **Pay-as-you-go**: Affordable character-based pricing
+- **Free Characters**: 30,000 characters for free monthly.
+- **Pay-as-you-go**: Affordable character-based pricing. Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 - **No subscription required**
-
-Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 
 ## Troubleshooting
 
