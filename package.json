@@ -2,7 +2,7 @@
   "name": "translate-i18n-json",
   "displayName": "Translate I18n JSON by l10n.dev",
   "description": "Translate i18n JSON files with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
@@ -102,6 +102,11 @@
           "type": "boolean",
           "default": false,
           "description": "Use shortened forms if translation is longer than source text"
+        },
+        "l10n-translate-i18n.generatePluralForms": {
+          "type": "boolean",
+          "default": false,
+          "description": "Generate additional plural form strings (e.g., for i18next) with plural suffixes. Do not enable for strict source-to-target mapping."
         }
       }
     }

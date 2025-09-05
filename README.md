@@ -9,7 +9,8 @@ AI-powered localization in VS Code. Translate i18n JSON files directly in your e
 ## Features
 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI.
-- 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not") and enable shortening when translations exceed source text length.
+- 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
+- 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
 - 🛠️ **Developer-Friendly Features**: Preserves placeholders, HTML tags, and formatting while adapting dates and numbers to target locales. Intelligently avoids translating things that shouldn't be translated (proper names, urls, technical terms, etc.). Learn more in this article: [i18n vs l10n: Why Developers Should Care and How AI Can Help](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17).
 - 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
@@ -84,6 +85,7 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 
 - **Use Contractions**: Makes translations less formal (default: true)
 - **Use Shortening**: Uses shortened forms if translation is longer than source (default: false)
+- **Generate Plural Forms**: Generates additional plural form strings (e.g., for i18next) with plural suffixes. Do not enable for strict source-to-target mapping (default: false)
 
 ## Commands
 

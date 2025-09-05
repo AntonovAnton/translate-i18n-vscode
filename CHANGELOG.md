@@ -2,6 +2,21 @@
 
 All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
 
+## [1.1.0] - 2025-09-05
+
+### Added
+- ✨ **Generate Additional Plural Forms**: The new `generatePluralForms` setting enables automatic creation of all required plural form strings for languages with complex pluralization rules (e.g., Russian, Arabic, Polish).
+- ⚙️ **Improved i18next Compatibility**: Designed specifically for i18next and similar frameworks that need accurate plural form handling.
+- 🔧 **New Configuration Setting**: `l10n-translate-i18n.generatePluralForms` (default: false)
+
+### Changed
+- 📖 **Updated Documentation**: Enhanced README with plural forms configuration details.
+- ⚡ **API Integration**: Updated translation request interface to support the new generatePluralForms property.
+
+### Notes
+- **Important**: Do not enable `generatePluralForms` for strict source-to-target mapping projects as it generates additional plural suffixes (extra keys not present in the source file).
+- **Use Case**: This feature is specifically designed for i18next and similar frameworks that handle plural forms.
+
 ## [1.0.0] - 2025-08-26
 
 ### Added

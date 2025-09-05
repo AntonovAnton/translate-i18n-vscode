@@ -127,6 +127,7 @@ async function performTranslation(
           targetLanguageCode: normalizedTargetLanguage,
           useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
           useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
+          generatePluralForms: config.get(CONFIG.KEYS.GENERATE_PLURAL_FORMS, false),
           client: "vscode-extension",
         };
 
