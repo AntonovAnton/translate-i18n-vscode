@@ -5,6 +5,7 @@ export const CONFIG = {
     API_KEY: "apiKey",
     USE_CONTRACTIONS: "useContractions",
     USE_SHORTENING: "useShortening",
+    GENERATE_PLURAL_FORMS: "generatePluralForms",
   },
 } as const;
 

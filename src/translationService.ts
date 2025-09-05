@@ -8,6 +8,7 @@ export interface TranslationRequest {
   targetLanguageCode: string;
   useContractions?: boolean;
   useShortening?: boolean;
+  generatePluralForms?: boolean;
   client: string;
 }
 
