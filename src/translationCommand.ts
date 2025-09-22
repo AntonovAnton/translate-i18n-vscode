@@ -127,8 +127,12 @@ async function performTranslation(
           targetLanguageCode: normalizedTargetLanguage,
           useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
           useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
-          generatePluralForms: config.get(CONFIG.KEYS.GENERATE_PLURAL_FORMS, false),
+          generatePluralForms: config.get(
+            CONFIG.KEYS.GENERATE_PLURAL_FORMS,
+            false
+          ),
           client: "vscode-extension",
+          returnTranslationsAsString: true,
         };
 
         const result = await translationService.translateJson(request);
@@ -154,8 +158,7 @@ async function performTranslation(
         );
 
         // Save translated file
-        const translatedContent = JSON.stringify(result.translations, null, 2);
-        fs.writeFileSync(outputPath, translatedContent, "utf8");
+        fs.writeFileSync(outputPath, result.translations, "utf8");
 
         // Show success message with usage info after progress completes
         await showTranslationSuccess(result, outputPath);
