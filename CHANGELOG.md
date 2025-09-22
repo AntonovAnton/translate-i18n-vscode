@@ -2,6 +2,21 @@
 
 All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
 
+## [1.2.0] - 2025-09-22
+
+### Added
+- ✨ **String Output Format**: Implemented `returnTranslationsAsString` feature that returns translations as stringified JSON
+- 🔧 **Preserved Structure**: Maintains original JSON structure and key ordering in translated output
+- ⚡ **Optimized Performance**: Eliminates the need for additional JSON.stringify() operations on the client side
+
+### Changed
+- 🔄 **API Integration**: Updated translation request interface to always use `returnTranslationsAsString: true`
+- 📦 **Internal Optimization**: Streamlined translation output handling for better performance
+
+### Notes
+- **Always Enabled**: This feature is permanently enabled for the extension to ensure consistent behavior
+- **Backward Compatible**: No breaking changes - existing functionality remains unchanged
+
 ## [1.1.0] - 2025-09-05
 
 ### Added

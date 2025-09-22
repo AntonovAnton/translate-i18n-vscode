@@ -4,17 +4,18 @@ import { logInfo, logWarning, showAndLogError } from "./logger";
 
 // API Types based on the OpenAPI specification
 export interface TranslationRequest {
-  sourceStrings: string | Record<string, any>;
+  sourceStrings: string;
   targetLanguageCode: string;
   useContractions?: boolean;
   useShortening?: boolean;
   generatePluralForms?: boolean;
+  returnTranslationsAsString: boolean;
   client: string;
 }
 
 export interface TranslationResult {
   targetLanguageCode: string;
-  translations?: Record<string, any>;
+  translations?: string;
   usage: TranslationUsage;
   finishReason?: FinishReason;
   completedChunks: number;
