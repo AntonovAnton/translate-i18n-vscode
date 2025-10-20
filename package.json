@@ -2,7 +2,7 @@
   "name": "translate-i18n-json",
   "displayName": "Translate I18n JSON by l10n.dev",
   "description": "Translate i18n JSON files with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",

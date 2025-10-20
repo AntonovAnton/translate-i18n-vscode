@@ -2,6 +2,22 @@
 
 All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
 
+## [1.3.0] - 2025-10-21
+
+### Added
+- 🔄 **Translate Only New Strings**: Added smart update mode that detects existing target files and prompts users to either translate only new strings or create a new file
+- 📝 **Incremental Translation Support**: When translating only new strings, the extension reads the existing target file and sends both source and target to the API, which returns an updated translation with only the new strings translated
+- 🎯 **Flexible File Management**: Users can choose between updating existing translations or creating new files with copy numbers (e.g., `es (1).json`)
+
+### Changed
+- 🔧 **Enhanced Translation Request**: Added `translateOnlyNewStrings` and `targetStrings` properties to support incremental translations
+- 💾 **Smart File Saving**: Implemented logic to replace existing files when updating translations or generate unique filenames when creating new copies
+
+### Notes
+- **Backward Compatible**: No breaking changes - existing functionality remains unchanged
+- ⚠️ **Array Handling Warning**: When using "Translate Only New Strings" with JSON arrays, ensure array indexes match between source and target files. Always append new items to the end of arrays. Object-based JSON structures (recommended for i18n) don't have this limitation as they match by key names.
+- **User Experience**: When a target file exists, users are presented with a clear dialog offering three options: "Translate Only New Strings", "Create New File", or "Cancel"
+
 ## [1.2.0] - 2025-09-22
 
 ### Added
@@ -14,7 +30,7 @@ All notable changes to the "Translate I18n JSON by l10n.dev" extension will be d
 - 📦 **Internal Optimization**: Streamlined translation output handling for better performance
 
 ### Notes
-- **Always Enabled**: This feature is permanently enabled for the extension to ensure consistent behavior
+- **Always Enabled**: The `returnTranslationsAsString` feature is permanently enabled for the extension to ensure consistent behavior
 - **Backward Compatible**: No breaking changes - existing functionality remains unchanged
 
 ## [1.1.0] - 2025-09-05

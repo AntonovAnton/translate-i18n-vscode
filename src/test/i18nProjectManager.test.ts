@@ -135,7 +135,8 @@ suite("I18nProjectManager Test Suite", () => {
       fs.writeFileSync(conflictFile1, "{}");
       fs.writeFileSync(conflictFile2, "{}");
 
-      const targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+      let targetPath = detector.generateTargetFilePath(sourceFile, "fr");
+      targetPath = detector.getUniqueFilePath(targetPath);
 
       const expectedPath = path.join(i18nDir, "fr (2).json");
       assert.strictEqual(targetPath, expectedPath);

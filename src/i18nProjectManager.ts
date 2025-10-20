@@ -86,7 +86,7 @@ export class I18nProjectManager {
 
         // Use the same file name as source
         const targetFilePath = path.join(targetDir, `${sourceFileName}.json`);
-        return this.getUniqueFilePath(targetFilePath);
+        return targetFilePath;
       }
 
       case ProjectStructureType.FileBased: {
@@ -95,7 +95,7 @@ export class I18nProjectManager {
           structureInfo.basePath,
           `${targetLanguage}.json`
         );
-        return this.getUniqueFilePath(targetFilePath);
+        return targetFilePath;
       }
 
       default: {
@@ -105,9 +105,29 @@ export class I18nProjectManager {
           sourceDir,
           `${sourceFileName}.${targetLanguage}.json`
         );
-        return this.getUniqueFilePath(targetFilePath);
+        return targetFilePath;
       }
     }
+  }
+
+  getUniqueFilePath(filePath: string): string {
+    if (!fs.existsSync(filePath)) {
+      return filePath;
+    }
+
+    const dir = path.dirname(filePath);
+    const ext = path.extname(filePath);
+    const baseName = path.basename(filePath, ext);
+
+    let counter = 1;
+    let uniquePath: string;
+
+    do {
+      uniquePath = path.join(dir, `${baseName} (${counter})${ext}`);
+      counter++;
+    } while (fs.existsSync(uniquePath));
+
+    return uniquePath;
   }
 
   normalizeLanguageCode(code: string): string {
@@ -165,25 +185,5 @@ export class I18nProjectManager {
       type: ProjectStructureType.Unknown,
       basePath: sourceDir,
     };
-  }
-
-  private getUniqueFilePath(filePath: string): string {
-    if (!fs.existsSync(filePath)) {
-      return filePath;
-    }
-
-    const dir = path.dirname(filePath);
-    const ext = path.extname(filePath);
-    const baseName = path.basename(filePath, ext);
-
-    let counter = 1;
-    let uniquePath: string;
-
-    do {
-      uniquePath = path.join(dir, `${baseName} (${counter})${ext}`);
-      counter++;
-    } while (fs.existsSync(uniquePath));
-
-    return uniquePath;
   }
 }

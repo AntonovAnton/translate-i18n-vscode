@@ -11,6 +11,8 @@ export interface TranslationRequest {
   generatePluralForms?: boolean;
   returnTranslationsAsString: boolean;
   client: string;
+  translateOnlyNewStrings?: boolean;
+  targetStrings?: string;
 }
 
 export interface TranslationResult {

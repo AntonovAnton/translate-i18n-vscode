@@ -4,14 +4,16 @@
 
 AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
 
-<img src="images/vs-code-extension-demonstration.jpg" alt="One click localization in VS Code">
+<img src="images/demonstration.gif" alt="One click localization in VS Code">
 
 ## Features
 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI.
 - 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
+- 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, or create a new file with a copy number. Perfect for iterative localization workflows.
 - 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
 - 🛠️ **Developer-Friendly Features**: Preserves placeholders, HTML tags, and formatting while adapting dates and numbers to target locales. Intelligently avoids translating things that shouldn't be translated (proper names, urls, technical terms, etc.). Learn more in this article: [i18n vs l10n: Why Developers Should Care and How AI Can Help](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17).
+- 🔒 **Type Safety**: Preserves JSON data types during translation—numbers remain numbers, booleans stay booleans, and null values are maintained. AI translates only string content without converting other data types to strings.
 - 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
 - 🌐 **i18next Support**: Works seamlessly with i18next and other common i18n formats.
@@ -35,8 +37,35 @@ AI-powered localization in VS Code. Translate i18n JSON files directly in your e
 1. Right-click on any JSON file in the Explorer or Editor
 2. Select `Translate JSON to...`
 3. Choose your target language (detected automatically or search manually)
-4. Wait for translation to complete
-5. The translated file will be saved with the target language code
+4. **If the target file already exists**, you'll be prompted to choose:
+   - **Translate Only New Strings**: Updates the existing file with only newly added strings from the source
+   - **Create New File**: Creates a new file with a copy number (e.g., `es (1).json`)
+   - **Cancel**: Cancels the translation
+5. Wait for translation to complete
+6. The translated file will be saved according to your choice
+
+### Important: Working with Arrays in JSON
+
+⚠️ **When using "Translate Only New Strings"**: If your JSON contains arrays (not just objects), make sure the array indexes in your target file match those in the source file. This ensures translations remain consistent. **When adding new strings, always append them to the end of the array.**
+
+**Example:**
+```json
+// ✅ CORRECT: New items added at the end
+// source.json
+["Apple", "Banana", "Orange"]
+
+// target.json (existing)
+["Manzana", "Plátano"]
+
+// After translation (new item appended)
+["Manzana", "Plátano", "Naranja"]
+
+// ❌ INCORRECT: Items inserted in the middle
+// This will cause misalignment!
+["Apple", "Cherry", "Banana", "Orange"]
+```
+
+For object-based JSON structures (recommended for i18n), this is not a concern as translations are matched by key names.
 
 ## Supported Project Structures
 

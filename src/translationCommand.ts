@@ -104,10 +104,66 @@ async function performTranslation(
   translationService: L10nTranslationService,
   i18nProjectManager: I18nProjectManager
 ) {
+  // Generate output file path to check if it exists
+  const outputPath = i18nProjectManager.generateTargetFilePath(
+    fileUri.fsPath,
+    targetLanguage
+  );
+
+  // Check if target file exists and ask user if they want to translate only new strings
+  let translateOnlyNewStrings = false;
+  let targetStrings: string | undefined = undefined;
+
+  if (fs.existsSync(outputPath)) {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: "$(sync) Translate Only New Strings",
+          description: "Update existing file with only new translations",
+          value: "update",
+        },
+        {
+          label: "$(file-add) Create New File",
+          description: "Creates a copy with unique name",
+          value: "create",
+        },
+      ],
+      {
+        placeHolder: `Target file "${path.basename(
+          outputPath
+        )}" already exists. What would you like to do?`,
+        ignoreFocusOut: true,
+      }
+    );
+
+    if (!choice) {
+      return; // User cancelled
+    }
+
+    if (choice.value === "update") {
+      translateOnlyNewStrings = true;
+      // Read existing target file
+      targetStrings = fs.readFileSync(outputPath, "utf8");
+      logInfo(
+        `User chose to translate only new strings for: ${path.basename(
+          outputPath
+        )}`
+      );
+    } else {
+      logInfo(
+        `User chose to create new file instead of updating: ${path.basename(
+          outputPath
+        )}`
+      );
+    }
+  }
+
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `Translating to ${targetLanguage}...`,
+      title: `Translating ${path.basename(
+        fileUri.fsPath
+      )} to ${targetLanguage} `,
       cancellable: false,
     },
     async (progress) => {
@@ -133,6 +189,8 @@ async function performTranslation(
           ),
           client: "vscode-extension",
           returnTranslationsAsString: true,
+          translateOnlyNewStrings,
+          targetStrings,
         };
 
         const result = await translationService.translateJson(request);
@@ -151,23 +209,27 @@ async function performTranslation(
 
         progress.report({ message: "Saving translated file..." });
 
-        // Generate output file path using the new structure detection logic
-        const outputPath = i18nProjectManager.generateTargetFilePath(
-          fileUri.fsPath,
-          targetLanguage
-        );
+        // Determine final output path
+        let finalOutputPath = outputPath;
+
+        // If not replacing file generate a new path with copy number
+        if (!translateOnlyNewStrings) {
+          finalOutputPath = i18nProjectManager.getUniqueFilePath(outputPath);
+        }
 
         // Save translated file
-        fs.writeFileSync(outputPath, result.translations, "utf8");
+        fs.writeFileSync(finalOutputPath, result.translations, "utf8");
 
         // Show success message with usage info after progress completes
-        await showTranslationSuccess(result, outputPath);
+        await showTranslationSuccess(result, finalOutputPath);
 
         // Log successful translation
         logInfo(
           `Translation completed successfully. File: ${path.basename(
-            outputPath
-          )}, Characters used: ${result.usage.charsUsed || 0}`
+            finalOutputPath
+          )}, Characters used: ${
+            result.usage.charsUsed || 0
+          }, Translate only new strings: ${translateOnlyNewStrings}`
         );
       } catch (error) {
         showAndLogError(
