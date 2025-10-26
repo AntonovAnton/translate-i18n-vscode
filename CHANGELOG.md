@@ -2,7 +2,7 @@
 
 All notable changes to the "Translate I18n JSON/ARB by l10n.dev" extension will be documented in this file.
 
-## [1.4.0] - 2025-10-25
+## [1.4.0] - 2025-10-27
 
 ### Added
 - 🎯 **Flutter Localization Support**: Full support for ARB (Application Resource Bundle) files used in Flutter applications
