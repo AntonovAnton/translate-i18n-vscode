@@ -22,6 +22,7 @@ export interface TranslationResult {
   finishReason?: FinishReason;
   completedChunks: number;
   totalChunks: number;
+  remainingBalance?: number;
 }
 
 export interface TranslationUsage {

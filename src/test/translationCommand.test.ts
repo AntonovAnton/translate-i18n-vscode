@@ -116,4 +116,118 @@ suite("Translation Command Tests", () => {
 
     assert.ok(getConfigStub.called);
   });
+
+  suite("ARB File Handling", () => {
+    test("handleTranslateCommand shows appropriate message for ARB files when no file selected", async () => {
+      // Arrange
+      mockApiKeyManager.ensureApiKey.resolves("test-api-key");
+
+      const mockUri = undefined; // No URI provided
+
+      // Act
+      await handleTranslateCommand(
+        mockUri as any,
+        mockApiKeyManager,
+        mockTranslationService,
+        mockI18nProjectManager,
+        mockLanguageSelector,
+        true // isArbFile
+      );
+
+      // Assert
+      assert.ok(
+        (vscode.commands.executeCommand as sinon.SinonStub).calledWith(
+          VSCODE_COMMANDS.QUICK_OPEN
+        )
+      );
+      assert.ok(
+        (vscode.window.showInformationMessage as sinon.SinonStub).calledWith(
+          "Search for and open a ARB file, then run the translate command again."
+        )
+      );
+    });
+
+    test("handleTranslateCommand validates ARB language codes correctly", async () => {
+      // Arrange
+      mockApiKeyManager.ensureApiKey.resolves("test-api-key");
+      mockI18nProjectManager.detectLanguagesFromProject.returns(["es", "fr_FR"]);
+      mockLanguageSelector.selectTargetLanguage.resolves("es_ES");
+      mockI18nProjectManager.validateLanguageCode.withArgs("es_ES").returns(false);
+
+      const mockUri = {
+        fsPath: "/test/path/app_en_US.arb",
+      };
+
+      // Act
+      await handleTranslateCommand(
+        mockUri as any,
+        mockApiKeyManager,
+        mockTranslationService,
+        mockI18nProjectManager,
+        mockLanguageSelector,
+        true // isArbFile
+      );
+
+      // Assert - validateLanguageCode is called without isArbFile parameter
+      assert.ok(mockI18nProjectManager.validateLanguageCode.calledWith("es_ES"));
+      assert.ok(
+        (vscode.window.showErrorMessage as sinon.SinonStub).calledWith(
+          sinon.match(/BCP-47/)
+        )
+      );
+    });
+
+    test("handleTranslateCommand normalizes ARB language codes with underscore format", async () => {
+      // Arrange
+      mockApiKeyManager.ensureApiKey.resolves("test-api-key");
+      mockI18nProjectManager.detectLanguagesFromProject.returns(["es", "fr_FR"]);
+      mockLanguageSelector.selectTargetLanguage.resolves("es_ES");
+      mockI18nProjectManager.validateLanguageCode.withArgs("es_ES").returns(true);
+      mockI18nProjectManager.normalizeLanguageCode.withArgs("es_ES").returns("es-ES");
+      mockI18nProjectManager.generateTargetFilePath.returns("/test/path/app_es_ES.arb");
+      mockI18nProjectManager.getUniqueFilePath = sinon.stub().returns("/test/path/app_es_ES.arb");
+      
+      // Mock file system operations
+      const fs = require("fs");
+      sinon.stub(fs, "readFileSync").returns('{"test": "source"}');
+      sinon.stub(fs, "existsSync").returns(false);
+      sinon.stub(fs, "writeFileSync");
+      
+      mockTranslationService.translateJson.resolves({
+        translations: '{"test": "translated"}',
+        usage: { charsUsed: 100 },
+        remainingBalance: 1000,
+      });
+
+      // Mock workspace configuration
+      const mockConfig = {
+        get: sinon.stub().returns(false)
+      };
+      sinon.stub(vscode.workspace, "getConfiguration").returns(mockConfig as any);
+
+      // Mock withProgress to execute the callback immediately
+      (vscode.window.withProgress as sinon.SinonStub).callsFake(async (options, callback) => {
+        const progress = { report: sinon.stub() };
+        const token = { checkCanceled: sinon.stub() };
+        return await callback(progress, token);
+      });
+
+      const mockUri = {
+        fsPath: "/test/path/app_en_US.arb",
+      };
+
+      // Act
+      await handleTranslateCommand(
+        mockUri as any,
+        mockApiKeyManager,
+        mockTranslationService,
+        mockI18nProjectManager,
+        mockLanguageSelector,
+        true // isArbFile
+      );
+
+      // Assert - normalizeLanguageCode is called without isArbFile parameter
+      assert.ok(mockI18nProjectManager.normalizeLanguageCode.calledWith("es_ES"));
+    });
+  });
 });

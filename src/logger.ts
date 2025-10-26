@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 
 // Create output channel for detailed logging
-const outputChannel = vscode.window.createOutputChannel("Translate i18n JSON");
+const outputChannel = vscode.window.createOutputChannel(
+  "Translate i18n JSON/ARB"
+);
 
 /**
  * Handles errors with both user notification and detailed logging
@@ -36,7 +38,7 @@ export function showAndLogError(
   outputChannel.appendLine("---");
 
   // Also log to console for development
-  console.error(`[Translate i18n JSON] ${userMessage}:`, error);
+  console.error(`[Translate i18n JSON/ARB] ${userMessage}:`, error);
 }
 
 /**

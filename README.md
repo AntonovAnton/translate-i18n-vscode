@@ -1,14 +1,13 @@
-<img src="images/logo-l10n-151x64.jpg" alt="l10n.dev" height=64 style="width:151px;height:64px;"/>
+# Translate I18n JSON/ARB by l10n.dev
 
-# Translate I18n JSON by l10n.dev
+AI-powered localization in VS Code. Translate i18n JSON and ARB files directly in your editor using l10n.dev's intelligent translation service.
 
-AI-powered localization in VS Code. Translate i18n JSON files directly in your editor using l10n.dev's intelligent translation service.
-
-<img src="images/demonstration.gif" alt="One click localization in VS Code">
+<img src="images/demonstration-dark.gif" alt="One click localization in VS Code">
 
 ## Features
 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI.
+- 🎯 **Flutter Localization Support**: Full support for ARB (Application Resource Bundle) files used in Flutter apps. Automatically handles `@@locale` and `@@last_modified` metadata.
 - 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
 - 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, or create a new file with a copy number. Perfect for iterative localization workflows.
 - 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
@@ -34,38 +33,26 @@ AI-powered localization in VS Code. Translate i18n JSON files directly in your e
 3. Paste your API Key when prompted
 
 ### 3. Translate Your Files
-1. Right-click on any JSON file in the Explorer or Editor
-2. Select `Translate JSON to...`
+1. Right-click on any JSON or ARB file in the Explorer or Editor
+2. Select `Translate JSON to...` for JSON files or `Translate ARB to...` for ARB files
 3. Choose your target language (detected automatically or search manually)
 4. **If the target file already exists**, you'll be prompted to choose:
    - **Translate Only New Strings**: Updates the existing file with only newly added strings from the source
-   - **Create New File**: Creates a new file with a copy number (e.g., `es (1).json`)
+   - **Create New File**: Creates a new file with a copy number (e.g., `es (1).json` or `app_es (1).arb`)
    - **Cancel**: Cancels the translation
 5. Wait for translation to complete
 6. The translated file will be saved according to your choice
 
-### Important: Working with Arrays in JSON
+### ARB File Support (Flutter Localization)
 
-⚠️ **When using "Translate Only New Strings"**: If your JSON contains arrays (not just objects), make sure the array indexes in your target file match those in the source file. This ensures translations remain consistent. **When adding new strings, always append them to the end of the array.**
+<img src="images/flutter-localization.gif" alt="Flutter Localization in VS Code">
 
-**Example:**
-```json
-// ✅ CORRECT: New items added at the end
-// source.json
-["Apple", "Banana", "Orange"]
+The extension fully supports ARB (Application Resource Bundle) files used in Flutter applications:
 
-// target.json (existing)
-["Manzana", "Plátano"]
-
-// After translation (new item appended)
-["Manzana", "Plátano", "Naranja"]
-
-// ❌ INCORRECT: Items inserted in the middle
-// This will cause misalignment!
-["Apple", "Cherry", "Banana", "Orange"]
-```
-
-For object-based JSON structures (recommended for i18n), this is not a concern as translations are matched by key names.
+- **Automatic Metadata Updates**: The API automatically updates `@@locale` to the target language code and `@@last_modified` to the current UTC timestamp
+- **Custom Prefixes**: Supports custom file naming patterns (e.g., `app_en_US.arb`, `my_app_fr.arb`)
+- **Underscore Format**: ARB files use underscores instead of hyphens (e.g., `en_US` instead of `en-US`)
+- **Perfect for Flutter**: Seamlessly integrates with Flutter's localization workflow
 
 ## Supported Project Structures
 
@@ -98,7 +85,15 @@ i18n/
 ├── de.json
 └── zh-Hans-CN.json
 ```
-
+```
+l10n/
+├── app_en.json
+├── app_en_US.json
+├── app_es.json
+├── app_fr.json
+├── app_de.json
+└── app_zh_Hans_CN.json
+```
 **How it works:**
 - **Detection**: Language code is identified from the filename (e.g., `en.json`, `es.json`, `fr.json`)
 - **File Saving**: Saves the translated file using the target language code as the filename in the same folder
@@ -122,6 +117,7 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 - `Translate I18n: Clear API Key` - Clear API Key in VS Code secrets storage
 - `Translate I18n: Configure Translation Options` - Open extension settings
 - `Translate I18n: Translate JSON to...` - Translate JSON file
+- `Translate I18n: Translate ARB to...` - Translate ARB file (Flutter localization)
 
 ## Language Support
 
@@ -155,6 +151,29 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 **"Invalid JSON file"**
 - Ensure your JSON file is valid
 - Check for syntax errors using VS Code's built-in JSON validation
+
+### Important: Working with Arrays in JSON
+
+⚠️ **When using "Translate Only New Strings"**: If your JSON contains arrays (not just objects), make sure the array indexes in your target file match those in the source file. This ensures translations remain consistent. **When adding new strings, always append them to the end of the array.**
+
+**Example:**
+```json
+// ✅ CORRECT: New items added at the end
+// source.json
+["Apple", "Banana", "Orange"]
+
+// target.json (existing)
+["Manzana", "Plátano"]
+
+// After translation (new item appended)
+["Manzana", "Plátano", "Naranja"]
+
+// ❌ INCORRECT: Items inserted in the middle
+// This will cause misalignment!
+["Apple", "Cherry", "Banana", "Orange"]
+```
+
+For object-based JSON structures (recommended for i18n), this is not a concern as translations are matched by key names.
 
 ## Support
 

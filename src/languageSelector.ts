@@ -6,7 +6,8 @@ export class LanguageSelector {
   constructor(private readonly translationService: L10nTranslationService) {}
 
   async selectTargetLanguage(
-    detectedLanguages: string[] = []
+    detectedLanguages: string[] = [],
+    useUnderscores: boolean = false
   ): Promise<string | undefined> {
     let targetLanguage: string | undefined;
 
@@ -25,7 +26,7 @@ export class LanguageSelector {
 
     // Step 2: If no language selected, show search input
     if (!targetLanguage) {
-      const result = await this.showLanguageSearchInput();
+      const result = await this.showLanguageSearchInput(useUnderscores);
 
       if (result === null) {
         return; // User cancelled
@@ -72,10 +73,12 @@ export class LanguageSelector {
     return selection.label;
   }
 
-  private async showLanguageSearchInput(): Promise<string | null | undefined> {
+  private async showLanguageSearchInput(
+    useUnderscores: boolean
+  ): Promise<string | null | undefined> {
     const searchInput = await vscode.window.showInputBox({
       prompt: "Type to select target language",
-      placeHolder: 'e.g., "spanish", "es", "zh-CN"',
+      placeHolder: 'e.g., "spanish", "es", "zh-CN", "en_US"',
     });
 
     if (!searchInput) {
@@ -94,7 +97,7 @@ export class LanguageSelector {
       }
 
       const languageOptions = predictedLanguages.map((lang) => ({
-        label: lang.code,
+        label: useUnderscores ? lang.code.replace(/-/g, "_") : lang.code,
         description: lang.name,
       }));
 
@@ -124,7 +127,7 @@ export class LanguageSelector {
   private async showManualLanguageInput(): Promise<string | undefined> {
     const searchInput = await vscode.window.showInputBox({
       prompt: "Enter target language code (BCP-47 format)",
-      placeHolder: 'e.g., "es", "fr", "zh-CN", "en-US"',
+      placeHolder: 'e.g., "es", "fr", "zh-CN", "en_US"',
     });
 
     return searchInput;
