@@ -1,10 +1,8 @@
-<img src="images/logo-l10n-151x64.jpg" alt="l10n.dev" height=64 style="width:151px;height:64px;"/>
-
 # Translate I18n JSON/ARB by l10n.dev
 
 AI-powered localization in VS Code. Translate i18n JSON and ARB files directly in your editor using l10n.dev's intelligent translation service.
 
-<img src="images/demonstration.gif" alt="One click localization in VS Code">
+<img src="images/demonstration-dark.gif" alt="One click localization in VS Code">
 
 ## Features
 
@@ -46,6 +44,8 @@ AI-powered localization in VS Code. Translate i18n JSON and ARB files directly i
 6. The translated file will be saved according to your choice
 
 ### ARB File Support (Flutter Localization)
+
+<img src="images/flutter-localization.gif" alt="Flutter Localization in VS Code">
 
 The extension fully supports ARB (Application Resource Bundle) files used in Flutter applications:
 
