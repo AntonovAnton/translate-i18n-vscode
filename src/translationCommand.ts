@@ -27,7 +27,8 @@ export async function handleTranslateCommand(
   apiKeyManager: ApiKeyManager,
   translationService: L10nTranslationService,
   i18nProjectManager: I18nProjectManager,
-  languageSelector: LanguageSelector
+  languageSelector: LanguageSelector,
+  isArbFile: boolean = false
 ) {
   try {
     // Ensure we have an API Key (will prompt user if needed)
@@ -39,9 +40,12 @@ export async function handleTranslateCommand(
     // Get the file to translate
     let fileUri = uri || vscode.window.activeTextEditor?.document.uri;
 
-    // If no valid JSON file is available, prompt user to search and open one
-    if (!fileUri || !fileUri.fsPath.endsWith(".json")) {
-      logInfo("No selected JSON file, opening Quick Open panel");
+    const expectedExtension = isArbFile ? ".arb" : ".json";
+    const fileType = isArbFile ? "ARB" : "JSON";
+
+    // If no valid file is available, prompt user to search and open one
+    if (!fileUri || !fileUri.fsPath.endsWith(expectedExtension)) {
+      logInfo(`No selected ${fileType} file, opening Quick Open panel`);
 
       // Use VS Code's Quick Open panel (Ctrl+P equivalent)
       await vscode.commands.executeCommand(VSCODE_COMMANDS.QUICK_OPEN);
@@ -50,7 +54,7 @@ export async function handleTranslateCommand(
 
       // Show a message to guide the user
       vscode.window.showInformationMessage(
-        "Search for and open a JSON file, then run the translate command again.",
+        `Search for and open a ${fileType} file, then run the translate command again.`,
         { modal: false }
       );
 
@@ -64,7 +68,8 @@ export async function handleTranslateCommand(
 
     // Let user choose target language
     const targetLanguage = await languageSelector.selectTargetLanguage(
-      detectedLanguages
+      detectedLanguages,
+      isArbFile
     );
 
     if (!targetLanguage) {
@@ -72,7 +77,7 @@ export async function handleTranslateCommand(
     }
 
     if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
-      const message = "Invalid language code format. Please use BCP-47 format.";
+      const message = `Invalid language code format. Please use BCP-47 format (e.g., en-US, en_US).`;
       vscode.window.showErrorMessage(message);
       logInfo(`Validation error: ${message} (Language: ${targetLanguage})`);
       return;
@@ -170,7 +175,7 @@ async function performTranslation(
       try {
         progress.report({ message: "Sending translation request..." });
 
-        // Read JSON file
+        // Read file
         const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
 
         // Normalize target language for API call
@@ -254,7 +259,8 @@ async function showTranslationSuccess(
   // Small delay to ensure progress dialog closes first
   setTimeout(async () => {
     const charsUsed = result.usage.charsUsed || 0;
-    const message = `✅ Translation completed! Used ${charsUsed} characters. File saved as ${path.basename(
+    const remainingBalance = result.remainingBalance || 0;
+    const message = `✅ Translation completed! Used ${charsUsed.toLocaleString()} characters. Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
       outputPath
     )}`;
 

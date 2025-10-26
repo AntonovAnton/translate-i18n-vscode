@@ -28,6 +28,7 @@ export const COMMANDS = {
   CLEAR_API_KEY: "l10n.translate-i18n.clearApiKey",
   CONFIGURE_OPTIONS: "l10n.translate-i18n.configureOptions",
   TRANSLATE: "l10n.translate-i18n.translate",
+  TRANSLATE_ARB: "l10n.translate-i18n.translateArb",
 } as const;
 
 // VS Code built-in commands

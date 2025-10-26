@@ -1,6 +1,27 @@
 # Change Log
 
-All notable changes to the "Translate I18n JSON by l10n.dev" extension will be documented in this file.
+All notable changes to the "Translate I18n JSON/ARB by l10n.dev" extension will be documented in this file.
+
+## [1.4.0] - 2025-10-25
+
+### Added
+- 🎯 **Flutter Localization Support**: Full support for ARB (Application Resource Bundle) files used in Flutter applications
+- 📱 **ARB File Translation**: New `Translate ARB to...` command specifically for ARB files
+- 🔄 **Automatic ARB Metadata Updates**: The l10n.dev API automatically updates `@@locale` to the target language code and `@@last_modified` to current UTC timestamp
+- 🏷️ **Custom Prefix Support**: ARB files with custom prefixes (e.g., `app_en_US.arb`, `my_app_fr.arb`) are automatically handled
+- 📊 **Remaining Balance Display**: Translation success notification now shows remaining character balance after translation
+- 🔤 **Underscore Format**: ARB files use underscores for language codes (e.g., `en_US`) instead of hyphens
+
+### Changed
+- 🔧 **Enhanced Language Detection**: Updated project structure detection to support both JSON (hyphen-based) and ARB (underscore-based) file naming conventions
+- 📁 **Smart File Naming**: Automatically generates correct target file names based on file type (JSON vs ARB) and detected naming patterns
+- ⚙️ **Language Code Validation**: Added separate validation for ARB format language codes with underscores
+- 💬 **Improved Notifications**: Character usage now displays with thousands separators for better readability
+
+### Notes
+- **ARB vs JSON**: Use `Translate ARB to...` for Flutter ARB files and `Translate JSON to...` for standard i18n JSON files
+- **File Format Detection**: The extension automatically detects file type based on extension (.arb or .json)
+- **Backward Compatible**: All existing JSON translation functionality remains unchanged
 
 ## [1.3.0] - 2025-10-21
 

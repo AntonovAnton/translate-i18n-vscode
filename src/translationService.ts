@@ -22,6 +22,7 @@ export interface TranslationResult {
   finishReason?: FinishReason;
   completedChunks: number;
   totalChunks: number;
+  remainingBalance?: number;
 }
 
 export interface TranslationUsage {
@@ -177,7 +178,8 @@ export class L10nTranslationService {
       throw new Error(errorMessage);
     }
 
-    const result = (await response.json()) as TranslationResult;
+    const body = await response.json();
+    const result = body as TranslationResult;
 
     // Handle finish reasons by throwing errors
     if (result.finishReason) {

@@ -119,7 +119,22 @@ function registerCommands(
         apiKeyManager,
         translationService,
         i18nProjectManager,
-        languageSelector
+        languageSelector,
+        false // isArbFile
+      )
+  );
+
+  // Register translate ARB command
+  const translateArbDisposable = vscode.commands.registerCommand(
+    COMMANDS.TRANSLATE_ARB,
+    async (uri: vscode.Uri) =>
+      await handleTranslateCommand(
+        uri,
+        apiKeyManager,
+        translationService,
+        i18nProjectManager,
+        languageSelector,
+        true // isArbFile
       )
   );
 
@@ -127,7 +142,8 @@ function registerCommands(
     setApiKeyDisposable,
     clearApiKeyDisposable,
     configureOptionsDisposable,
-    translateDisposable
+    translateDisposable,
+    translateArbDisposable
   );
 }
 
