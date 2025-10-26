@@ -174,8 +174,6 @@ export class I18nProjectManager {
   }
 
   normalizeLanguageCode(code: string): string {
-    const separator = "-";
-
     const match = code.match(this.languageCodeRegex);
     if (!match?.groups) {
       return code; // Return as-is if it doesn't match the pattern
@@ -187,14 +185,12 @@ export class I18nProjectManager {
     if (script) {
       // Script codes: first letter uppercase, rest lowercase
       normalized +=
-        separator +
-        script.charAt(0).toUpperCase() +
-        script.slice(1).toLowerCase();
+        "-" + script.charAt(0).toUpperCase() + script.slice(1).toLowerCase();
     }
 
     if (region) {
       // Region codes: all uppercase
-      normalized += separator + region.toUpperCase();
+      normalized += "-" + region.toUpperCase();
     }
 
     return normalized;

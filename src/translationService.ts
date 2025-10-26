@@ -178,8 +178,7 @@ export class L10nTranslationService {
       throw new Error(errorMessage);
     }
 
-    const body = await response.json();
-    const result = body as TranslationResult;
+    const result = (await response.json()) as TranslationResult;
 
     // Handle finish reasons by throwing errors
     if (result.finishReason) {

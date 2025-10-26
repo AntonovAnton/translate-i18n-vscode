@@ -77,7 +77,8 @@ export async function handleTranslateCommand(
     }
 
     if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
-      const message = `Invalid language code format. Please use BCP-47 format (e.g., en-US, en_US).`;
+      const message =
+        "Invalid language code format. Please use BCP-47 format (e.g., en-US, en_US).";
       vscode.window.showErrorMessage(message);
       logInfo(`Validation error: ${message} (Language: ${targetLanguage})`);
       return;
