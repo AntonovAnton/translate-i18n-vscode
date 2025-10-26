@@ -54,29 +54,6 @@ The extension fully supports ARB (Application Resource Bundle) files used in Flu
 - **Underscore Format**: ARB files use underscores instead of hyphens (e.g., `en_US` instead of `en-US`)
 - **Perfect for Flutter**: Seamlessly integrates with Flutter's localization workflow
 
-### Important: Working with Arrays in JSON
-
-⚠️ **When using "Translate Only New Strings"**: If your JSON contains arrays (not just objects), make sure the array indexes in your target file match those in the source file. This ensures translations remain consistent. **When adding new strings, always append them to the end of the array.**
-
-**Example:**
-```json
-// ✅ CORRECT: New items added at the end
-// source.json
-["Apple", "Banana", "Orange"]
-
-// target.json (existing)
-["Manzana", "Plátano"]
-
-// After translation (new item appended)
-["Manzana", "Plátano", "Naranja"]
-
-// ❌ INCORRECT: Items inserted in the middle
-// This will cause misalignment!
-["Apple", "Cherry", "Banana", "Orange"]
-```
-
-For object-based JSON structures (recommended for i18n), this is not a concern as translations are matched by key names.
-
 ## Supported Project Structures
 
 The extension automatically detects target languages from common i18n project structures and saves translated files accordingly:
@@ -174,6 +151,29 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 **"Invalid JSON file"**
 - Ensure your JSON file is valid
 - Check for syntax errors using VS Code's built-in JSON validation
+
+### Important: Working with Arrays in JSON
+
+⚠️ **When using "Translate Only New Strings"**: If your JSON contains arrays (not just objects), make sure the array indexes in your target file match those in the source file. This ensures translations remain consistent. **When adding new strings, always append them to the end of the array.**
+
+**Example:**
+```json
+// ✅ CORRECT: New items added at the end
+// source.json
+["Apple", "Banana", "Orange"]
+
+// target.json (existing)
+["Manzana", "Plátano"]
+
+// After translation (new item appended)
+["Manzana", "Plátano", "Naranja"]
+
+// ❌ INCORRECT: Items inserted in the middle
+// This will cause misalignment!
+["Apple", "Cherry", "Banana", "Orange"]
+```
+
+For object-based JSON structures (recommended for i18n), this is not a concern as translations are matched by key names.
 
 ## Support
 
