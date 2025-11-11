@@ -15,7 +15,7 @@ AI-powered localization in VS Code. Translate i18n JSON and ARB files directly i
 - 🔒 **Type Safety**: Preserves JSON data types during translation—numbers remain numbers, booleans stay booleans, and null values are maintained. AI translates only string content without converting other data types to strings.
 - 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
-- **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
+- 🌍 **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
 - 🌐 **i18next Support**: Works seamlessly with i18next and other common i18n formats.
 - 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding ~16,000 characters can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.

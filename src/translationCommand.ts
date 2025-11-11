@@ -143,7 +143,8 @@ export async function handleTranslateCommand(
 
     if (existingFiles.length > 0) {
       const choice = await askTranslateOnlyNewStringsPreference(
-        existingFiles.length
+        existingFiles.length,
+        path.basename(existingFiles[0])
       );
 
       if (!choice) {
