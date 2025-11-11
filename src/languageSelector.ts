@@ -8,8 +8,8 @@ export class LanguageSelector {
   async selectTargetLanguage(
     detectedLanguages: string[] = [],
     useUnderscores: boolean = false
-  ): Promise<string | undefined> {
-    let targetLanguage: string | undefined;
+  ): Promise<string | string[] | undefined> {
+    let targetLanguage: string | string[] | undefined;
 
     // Step 1: Show detected languages from project if available
     if (detectedLanguages.length > 0) {
@@ -45,15 +45,22 @@ export class LanguageSelector {
 
   private async showDetectedLanguagesQuickPick(
     detectedLanguages: string[]
-  ): Promise<string | null | undefined> {
+  ): Promise<string | string[] | null | undefined> {
     const options = [
+      {
+        label: "$(globe) Translate to All Languages",
+        description: `Translate to all ${detectedLanguages.length} detected languages`,
+        value: "ALL",
+      },
       ...detectedLanguages.map((lang) => ({
         label: lang,
         description: "Detected in project",
+        value: lang,
       })),
       {
         label: "$(search) Search for language...",
         description: "Type to select target language",
+        value: "SEARCH",
       },
     ];
 
@@ -66,11 +73,15 @@ export class LanguageSelector {
       return null; // User cancelled
     }
 
-    if (selection.label.startsWith("$(search)")) {
+    if (selection.value === "ALL") {
+      return detectedLanguages; // Return all languages
+    }
+
+    if (selection.value === "SEARCH") {
       return undefined; // User wants to search
     }
 
-    return selection.label;
+    return selection.value;
   }
 
   private async showLanguageSearchInput(
