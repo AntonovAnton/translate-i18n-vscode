@@ -19,6 +19,47 @@ import { showAndLogError, logInfo } from "./logger";
 import { CONFIG, VSCODE_COMMANDS } from "./constants";
 
 /**
+ * Asks user how to handle existing target files
+ * Returns user's choice or undefined if cancelled
+ */
+async function askTranslateOnlyNewStringsPreference(
+  existingFileCount: number,
+  fileName?: string
+): Promise<"update" | "create" | undefined> {
+  const isMultipleFiles = existingFileCount > 1;
+  const placeHolder = isMultipleFiles
+    ? `${existingFileCount} target file(s) already exist. What would you like to do?`
+    : `Target file "${fileName}" already exists. What would you like to do?`;
+
+  const choice = await vscode.window.showQuickPick(
+    [
+      {
+        label: "$(sync) Translate Only New Strings",
+        description: isMultipleFiles
+          ? "Update existing files with only new translations"
+          : "Update existing file with only new translations",
+        value: "update" as const,
+      },
+      {
+        label: isMultipleFiles
+          ? "$(file-add) Create New Files"
+          : "$(file-add) Create New File",
+        description: isMultipleFiles
+          ? "Creates copies with unique names for all translations"
+          : "Creates a copy with unique name",
+        value: "create" as const,
+      },
+    ],
+    {
+      placeHolder,
+      ignoreFocusOut: true,
+    }
+  );
+
+  return choice?.value;
+}
+
+/**
  * Handles the main translate command workflow
  * Validates file, gets API Key, selects target language, and performs translation
  */
@@ -66,31 +107,100 @@ export async function handleTranslateCommand(
       fileUri.fsPath
     );
 
-    // Let user choose target language
-    const targetLanguage = await languageSelector.selectTargetLanguage(
+    // Let user choose target language(s)
+    const targetLanguageSelection = await languageSelector.selectTargetLanguage(
       detectedLanguages,
       isArbFile
     );
 
-    if (!targetLanguage) {
+    if (!targetLanguageSelection) {
       return; // User cancelled language selection
     }
 
-    if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
-      const message =
-        "Invalid language code format. Please use BCP-47 format (e.g., en-US, en_US).";
-      vscode.window.showErrorMessage(message);
-      logInfo(`Validation error: ${message} (Language: ${targetLanguage})`);
-      return;
+    // Convert to array for uniform handling
+    const targetLanguages = Array.isArray(targetLanguageSelection)
+      ? targetLanguageSelection
+      : [targetLanguageSelection];
+
+    // Validate all target languages
+    for (const targetLanguage of targetLanguages) {
+      if (!i18nProjectManager.validateLanguageCode(targetLanguage)) {
+        const message = `Invalid language code format: ${targetLanguage}. Please use BCP-47 format (e.g., en-US, en_US).`;
+        vscode.window.showErrorMessage(message);
+        logInfo(`Validation error: ${message}`);
+        return;
+      }
     }
 
-    // Show progress and perform translation
-    await performTranslation(
-      fileUri,
-      targetLanguage,
-      translationService,
-      i18nProjectManager
+    // Ask user once about translate only new strings preference (if multiple files might exist)
+    let translateOnlyNewStrings = false;
+    const targetFilePaths = targetLanguages.map((lang) =>
+      i18nProjectManager.generateTargetFilePath(fileUri.fsPath, lang)
     );
+    const existingFiles = targetFilePaths.filter((targetFilePath) =>
+      fs.existsSync(targetFilePath)
+    );
+
+    if (existingFiles.length > 0) {
+      const choice = await askTranslateOnlyNewStringsPreference(
+        existingFiles.length
+      );
+
+      if (!choice) {
+        return; // User cancelled
+      }
+
+      translateOnlyNewStrings = choice === "update";
+      logInfo(
+        `User chose to ${
+          choice === "update" ? "update existing files" : "create new files"
+        } for ${targetLanguages.length} target language(s)`
+      );
+    }
+
+    // Perform translations
+    const totalLanguages = targetLanguages.length;
+    let successCount = 0;
+    let failedLanguages: string[] = [];
+
+    for (let i = 0; i < targetLanguages.length; i++) {
+      const targetLanguage = targetLanguages[i];
+      const targetFilePath = targetFilePaths[i];
+
+      try {
+        logInfo(
+          `Translating (${i + 1}/${totalLanguages}) to ${targetLanguage}`
+        );
+
+        await performTranslation(
+          fileUri.fsPath,
+          targetLanguage,
+          targetFilePath,
+          translationService,
+          i18nProjectManager,
+          translateOnlyNewStrings
+        );
+
+        successCount++;
+      } catch (error) {
+        failedLanguages.push(targetLanguage);
+        showAndLogError(
+          `Translation to ${targetLanguage} failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+          error,
+          `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
+        );
+      }
+    }
+
+    if (totalLanguages > 1) {
+      showSummaryForMultipleTranslations(
+        totalLanguages,
+        successCount,
+        failedLanguages
+      );
+    }
   } catch (error) {
     showAndLogError(
       `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -105,70 +215,23 @@ export async function handleTranslateCommand(
  * Reads file, calls translation service, and saves result
  */
 async function performTranslation(
-  fileUri: vscode.Uri,
+  sourceFilePath: string,
   targetLanguage: string,
+  targetFilePath: string,
   translationService: L10nTranslationService,
-  i18nProjectManager: I18nProjectManager
+  i18nProjectManager: I18nProjectManager,
+  translateOnlyNewStrings: boolean
 ) {
-  // Generate output file path to check if it exists
-  const outputPath = i18nProjectManager.generateTargetFilePath(
-    fileUri.fsPath,
-    targetLanguage
-  );
-
-  // Check if target file exists and ask user if they want to translate only new strings
-  let translateOnlyNewStrings = false;
   let targetStrings: string | undefined = undefined;
-
-  if (fs.existsSync(outputPath)) {
-    const choice = await vscode.window.showQuickPick(
-      [
-        {
-          label: "$(sync) Translate Only New Strings",
-          description: "Update existing file with only new translations",
-          value: "update",
-        },
-        {
-          label: "$(file-add) Create New File",
-          description: "Creates a copy with unique name",
-          value: "create",
-        },
-      ],
-      {
-        placeHolder: `Target file "${path.basename(
-          outputPath
-        )}" already exists. What would you like to do?`,
-        ignoreFocusOut: true,
-      }
-    );
-
-    if (!choice) {
-      return; // User cancelled
-    }
-
-    if (choice.value === "update") {
-      translateOnlyNewStrings = true;
-      // Read existing target file
-      targetStrings = fs.readFileSync(outputPath, "utf8");
-      logInfo(
-        `User chose to translate only new strings for: ${path.basename(
-          outputPath
-        )}`
-      );
-    } else {
-      logInfo(
-        `User chose to create new file instead of updating: ${path.basename(
-          outputPath
-        )}`
-      );
-    }
+  if (translateOnlyNewStrings && fs.existsSync(targetFilePath)) {
+    targetStrings = fs.readFileSync(targetFilePath, "utf8");
   }
 
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
       title: `Translating ${path.basename(
-        fileUri.fsPath
+        sourceFilePath
       )} to ${targetLanguage} `,
       cancellable: false,
     },
@@ -177,7 +240,7 @@ async function performTranslation(
         progress.report({ message: "Sending translation request..." });
 
         // Read file
-        const fileContent = fs.readFileSync(fileUri.fsPath, "utf8");
+        const fileContent = fs.readFileSync(sourceFilePath, "utf8");
 
         // Normalize target language for API call
         const normalizedTargetLanguage =
@@ -201,53 +264,50 @@ async function performTranslation(
 
         const result = await translationService.translateJson(request);
         if (!result) {
-          logInfo(`Translation failed for file: ${fileUri.fsPath}`);
+          logInfo(`Translation failed for file: ${sourceFilePath}`);
           return;
         }
 
         if (!result.translations) {
           const message =
             "No translation results received. Please verify that source file contains content.";
-          vscode.window.showInformationMessage(message);
-          logInfo(message);
+          showInformationMessage(message);
           return;
         }
 
         progress.report({ message: "Saving translated file..." });
 
         // Determine final output path
-        let finalOutputPath = outputPath;
+        let outputPath = targetFilePath;
 
         // If not replacing file generate a new path with copy number
         if (!translateOnlyNewStrings) {
-          finalOutputPath = i18nProjectManager.getUniqueFilePath(outputPath);
+          outputPath = i18nProjectManager.getUniqueFilePath(targetFilePath);
         }
 
         // Save translated file
-        fs.writeFileSync(finalOutputPath, result.translations, "utf8");
+        fs.writeFileSync(outputPath, result.translations, "utf8");
 
         // Show success message with usage info after progress completes
-        await showTranslationSuccess(result, finalOutputPath);
-
-        // Log successful translation
-        logInfo(
-          `Translation completed successfully. File: ${path.basename(
-            finalOutputPath
-          )}, Characters used: ${
-            result.usage.charsUsed || 0
-          }, Translate only new strings: ${translateOnlyNewStrings}`
-        );
+        await showTranslationSuccess(result, outputPath);
       } catch (error) {
         showAndLogError(
           `Translation failed: ${
             error instanceof Error ? error.message : "Unknown error"
           }`,
           error,
-          `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
+          `File: ${sourceFilePath}, Target: ${targetLanguage}`
         );
       }
     }
   );
+}
+
+async function showInformationMessage(message: string) {
+  logInfo(message);
+  setTimeout(() => {
+    vscode.window.showInformationMessage(message);
+  }, 100); // Small delay to ensure progress dialog closes first
 }
 
 /**
@@ -255,24 +315,47 @@ async function performTranslation(
  */
 async function showTranslationSuccess(
   result: TranslationResult,
-  outputPath: string
+  targetFilePath: string
 ) {
+  const charsUsed = result.usage.charsUsed || 0;
+  const remainingBalance = result.remainingBalance || 0;
+  const message = `✅ Translation completed! Used ${charsUsed.toLocaleString()} characters. Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
+    targetFilePath
+  )}`;
+  logInfo(message);
+
   // Small delay to ensure progress dialog closes first
   setTimeout(async () => {
-    const charsUsed = result.usage.charsUsed || 0;
-    const remainingBalance = result.remainingBalance || 0;
-    const message = `✅ Translation completed! Used ${charsUsed.toLocaleString()} characters. Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
-      outputPath
-    )}`;
-
     const action = await vscode.window.showInformationMessage(
       message,
       "Open File"
     );
 
     if (action === "Open File") {
-      const doc = await vscode.workspace.openTextDocument(outputPath);
+      const doc = await vscode.workspace.openTextDocument(targetFilePath);
       await vscode.window.showTextDocument(doc);
     }
   }, 100);
+}
+
+async function showSummaryForMultipleTranslations(
+  totalLanguages: number,
+  successCount: number,
+  failedLanguages: string[]
+) {
+  if (successCount === totalLanguages) {
+    vscode.window.showInformationMessage(
+      `✅ Successfully translated to all ${totalLanguages} languages!`
+    );
+  } else if (successCount > 0) {
+    vscode.window.showWarningMessage(
+      `⚠️ Translated to ${successCount}/${totalLanguages} languages. Failed: ${failedLanguages.join(
+        ", "
+      )}`
+    );
+  } else {
+    vscode.window.showErrorMessage(
+      `❌ All translations failed. Please check the logs.`
+    );
+  }
 }

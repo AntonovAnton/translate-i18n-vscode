@@ -15,6 +15,7 @@ AI-powered localization in VS Code. Translate i18n JSON and ARB files directly i
 - 🔒 **Type Safety**: Preserves JSON data types during translation—numbers remain numbers, booleans stay booleans, and null values are maintained. AI translates only string content without converting other data types to strings.
 - 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
+- **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
 - 🌐 **i18next Support**: Works seamlessly with i18next and other common i18n formats.
 - 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding ~16,000 characters can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
@@ -31,17 +32,13 @@ AI-powered localization in VS Code. Translate i18n JSON and ARB files directly i
 1. Open VS Code Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 2. Run `l10n.dev: Set API Key`
 3. Paste your API Key when prompted
-
 ### 3. Translate Your Files
 1. Right-click on any JSON or ARB file in the Explorer or Editor
-2. Select `Translate JSON to...` for JSON files or `Translate ARB to...` for ARB files
-3. Choose your target language (detected automatically or search manually)
-4. **If the target file already exists**, you'll be prompted to choose:
-   - **Translate Only New Strings**: Updates the existing file with only newly added strings from the source
-   - **Create New File**: Creates a new file with a copy number (e.g., `es (1).json` or `app_es (1).arb`)
-   - **Cancel**: Cancels the translation
+2. Select `Translate JSON to...` or `Translate ARB to...`
+3. Choose your target language (or select **"Translate to All Languages"** for batch translation)
+4. If target file(s) exist, choose to update existing files or create new ones
 5. Wait for translation to complete
-6. The translated file will be saved according to your choice
+6. Find your translated files in the appropriate language folders
 
 ### ARB File Support (Flutter Localization)
 

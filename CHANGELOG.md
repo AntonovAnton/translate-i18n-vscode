@@ -2,6 +2,21 @@
 
 All notable changes to the "Translate I18n JSON/ARB by l10n.dev" extension will be documented in this file.
 
+## [1.5.0] - 2025-11-11
+
+### Added
+- 🌍 **Translate to All Languages**: New option to translate to all detected languages at once with a single command
+- ⚡ **Batch Translation Preference**: When translating to multiple languages, set your preference once (update existing or create new files) instead of choosing for each file
+- 📊 **Batch Translation Summary**: See a summary of successful and failed translations when translating to multiple languages
+
+### Changed
+- 🎯 **Enhanced Language Selection**: Language picker now shows "Translate to All Languages" option when multiple languages are detected
+- 🔄 **Optimized Workflow**: "Translate Only New Strings" preference is asked once upfront for batch translations instead of for each file
+
+### Notes
+- **Perfect for Multi-Language Projects**: Quickly translate your source file to all project languages in one go
+- **Smart Conflict Handling**: Choose once how to handle existing files—update them or create new copies
+
 ## [1.4.0] - 2025-10-27
 
 ### Added
