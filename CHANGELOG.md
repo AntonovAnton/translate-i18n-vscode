@@ -2,6 +2,17 @@
 
 All notable changes to the "Translate I18n JSON/ARB by l10n.dev" extension will be documented in this file.
 
+## [1.5.1] - 2025-11-17
+
+### Changed
+- ⚡ **Parallel Translation Processing**: Translations to multiple languages now execute in parallel instead of sequentially, significantly reducing total translation time
+- 🚀 **Performance Improvement**: When translating to all languages, all API requests are now sent simultaneously, making the process much faster
+
+### Technical Details
+- Replaced sequential for-loop with `Promise.all()` for concurrent translation execution
+- Each language translation runs independently without waiting for others to complete
+- Error handling remains robust with individual language failures not affecting others
+
 ## [1.5.0] - 2025-11-11
 
 ### Added

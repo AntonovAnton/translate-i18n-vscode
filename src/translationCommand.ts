@@ -159,41 +159,48 @@ export async function handleTranslateCommand(
       );
     }
 
-    // Perform translations
+    // Perform translations in parallel
     const totalLanguages = targetLanguages.length;
-    let successCount = 0;
-    let failedLanguages: string[] = [];
 
-    for (let i = 0; i < targetLanguages.length; i++) {
-      const targetLanguage = targetLanguages[i];
-      const targetFilePath = targetFilePaths[i];
+    const translationPromises = targetLanguages.map(
+      async (targetLanguage, i) => {
+        const targetFilePath = targetFilePaths[i];
 
-      try {
-        logInfo(
-          `Translating (${i + 1}/${totalLanguages}) to ${targetLanguage}`
-        );
+        try {
+          logInfo(
+            `Translating (${i + 1}/${totalLanguages}) to ${targetLanguage}`
+          );
 
-        await performTranslation(
-          fileUri.fsPath,
-          targetLanguage,
-          targetFilePath,
-          translationService,
-          i18nProjectManager,
-          translateOnlyNewStrings
-        );
+          await performTranslation(
+            fileUri.fsPath,
+            targetLanguage,
+            targetFilePath,
+            translationService,
+            i18nProjectManager,
+            translateOnlyNewStrings
+          );
 
-        successCount++;
-      } catch (error) {
-        failedLanguages.push(targetLanguage);
-        showAndLogError(
-          `Translation to ${targetLanguage} failed: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-          error,
-          `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
-        );
+          return { success: true, language: targetLanguage };
+        } catch (error) {
+          showAndLogError(
+            `Translation to ${targetLanguage} failed: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+            error,
+            `File: ${fileUri.fsPath}, Target: ${targetLanguage}`
+          );
+          return { success: false, language: targetLanguage };
+        }
       }
-    }
+    );
+
+    // Wait for all translations to complete
+    const results = await Promise.all(translationPromises);
+
+    const successCount = results.filter((r) => r.success).length;
+    const failedLanguages = results
+      .filter((r) => !r.success)
+      .map((r) => r.language);
 
     if (totalLanguages > 1) {
       showSummaryForMultipleTranslations(
@@ -237,69 +244,59 @@ async function performTranslation(
       cancellable: false,
     },
     async (progress) => {
-      try {
-        progress.report({ message: "Sending translation request..." });
+      progress.report({ message: "Sending translation request..." });
 
-        // Read file
-        const fileContent = fs.readFileSync(sourceFilePath, "utf8");
+      // Read file
+      const fileContent = fs.readFileSync(sourceFilePath, "utf8");
 
-        // Normalize target language for API call
-        const normalizedTargetLanguage =
-          i18nProjectManager.normalizeLanguageCode(targetLanguage);
+      // Normalize target language for API call
+      const normalizedTargetLanguage =
+        i18nProjectManager.normalizeLanguageCode(targetLanguage);
 
-        const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
-        const request: TranslationRequest = {
-          sourceStrings: fileContent,
-          targetLanguageCode: normalizedTargetLanguage,
-          useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
-          useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
-          generatePluralForms: config.get(
-            CONFIG.KEYS.GENERATE_PLURAL_FORMS,
-            false
-          ),
-          client: "vscode-extension",
-          returnTranslationsAsString: true,
-          translateOnlyNewStrings,
-          targetStrings,
-        };
+      const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
+      const request: TranslationRequest = {
+        sourceStrings: fileContent,
+        targetLanguageCode: normalizedTargetLanguage,
+        useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
+        useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
+        generatePluralForms: config.get(
+          CONFIG.KEYS.GENERATE_PLURAL_FORMS,
+          false
+        ),
+        client: "vscode-extension",
+        returnTranslationsAsString: true,
+        translateOnlyNewStrings,
+        targetStrings,
+      };
 
-        const result = await translationService.translateJson(request);
-        if (!result) {
-          logInfo(`Translation failed for file: ${sourceFilePath}`);
-          return;
-        }
-
-        if (!result.translations) {
-          const message =
-            "No translation results received. Please verify that source file contains content.";
-          showInformationMessage(message);
-          return;
-        }
-
-        progress.report({ message: "Saving translated file..." });
-
-        // Determine final output path
-        let outputPath = targetFilePath;
-
-        // If not replacing file generate a new path with copy number
-        if (!translateOnlyNewStrings) {
-          outputPath = i18nProjectManager.getUniqueFilePath(targetFilePath);
-        }
-
-        // Save translated file
-        fs.writeFileSync(outputPath, result.translations, "utf8");
-
-        // Show success message with usage info after progress completes
-        await showTranslationSuccess(result, outputPath);
-      } catch (error) {
-        showAndLogError(
-          `Translation failed: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-          error,
-          `File: ${sourceFilePath}, Target: ${targetLanguage}`
-        );
+      const result = await translationService.translateJson(request);
+      if (!result) {
+        const message = "Translation service returned no result.";
+        throw new Error(message);
       }
+
+      if (!result.translations) {
+        const message =
+          "No translation results received. Please verify that source file contains content.";
+        showInformationMessage(message);
+        return;
+      }
+
+      progress.report({ message: "Saving translated file..." });
+
+      // Determine final output path
+      let outputPath = targetFilePath;
+
+      // If not replacing file generate a new path with copy number
+      if (!translateOnlyNewStrings) {
+        outputPath = i18nProjectManager.getUniqueFilePath(targetFilePath);
+      }
+
+      // Save translated file
+      fs.writeFileSync(outputPath, result.translations, "utf8");
+
+      // Show success message with usage info after progress completes
+      await showTranslationSuccess(result, outputPath);
     }
   );
 }

@@ -7,7 +7,8 @@ AI-powered localization in VS Code. Translate i18n JSON and ARB files directly i
 ## Features
 
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI.
-- 🎯 **Flutter Localization Support**: Full support for ARB (Application Resource Bundle) files used in Flutter apps. Automatically handles `@@locale` and `@@last_modified` metadata.
+- **165 Languages**: Translate to any of 165 supported languages.
+- **Flutter Localization Support**: Full support for ARB (Application Resource Bundle) files used in Flutter apps. Automatically handles `@@locale` and `@@last_modified` metadata.
 - 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
 - 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, or create a new file with a copy number. Perfect for iterative localization workflows.
 - 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
