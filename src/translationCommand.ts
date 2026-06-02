@@ -249,11 +249,6 @@ async function performTranslation(
   schema: FileSchema | null,
   format?: string,
 ): Promise<boolean> {
-  let targetStrings: string | undefined = undefined;
-  if (translateOnlyNewStrings && fs.existsSync(targetFilePath)) {
-    targetStrings = fs.readFileSync(targetFilePath, "utf8");
-  }
-
   return await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -268,15 +263,25 @@ async function performTranslation(
       // Read file
       const fileContent = fs.readFileSync(sourceFilePath, "utf8");
 
+      const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
+      const generateGlossary = config.get(CONFIG.KEYS.GENERATE_GLOSSARY, false);
+      let targetStrings: string | undefined = undefined;
+      if (
+        (translateOnlyNewStrings || generateGlossary) &&
+        fs.existsSync(targetFilePath)
+      ) {
+        targetStrings = fs.readFileSync(targetFilePath, "utf8");
+      }
+
       // Normalize target language for API call
       const normalizedTargetLanguage = normalizeLanguageCode(targetLanguage);
 
-      const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
       const request: TranslationRequest = {
         sourceStrings: fileContent,
         targetLanguageCode: normalizedTargetLanguage,
         useContractions: config.get(CONFIG.KEYS.USE_CONTRACTIONS, true),
         useShortening: config.get(CONFIG.KEYS.USE_SHORTENING, false),
+        generateGlossary,
         generatePluralForms: config.get(
           CONFIG.KEYS.GENERATE_PLURAL_FORMS,
           false,
