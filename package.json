@@ -1,8 +1,8 @@
 {
   "name": "translate-i18n-json",
-  "displayName": "Translate I18n by l10n.dev",
-  "description": "Translate i18n localization files (JSON, ARB, XML, YAML, PO, XLIFF, and more) with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "1.10.2",
+  "displayName": "Translate i18n by l10n.dev",
+  "description": "Translate i18n localization files (JSON, ARB, XML, YAML, PO, XLIFF, MD and more) with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
+  "version": "1.11.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
@@ -70,22 +70,22 @@
       {
         "command": "l10n.translate-i18n.translate",
         "title": "Translate to...",
-        "category": "Translate I18n"
+        "category": "Translate i18n"
       },
       {
         "command": "l10n.translate-i18n.setApiKey",
         "title": "Set API Key",
-        "category": "Translate I18n"
+        "category": "Translate i18n"
       },
       {
         "command": "l10n.translate-i18n.clearApiKey",
         "title": "Clear API Key",
-        "category": "Translate I18n"
+        "category": "Translate i18n"
       },
       {
         "command": "l10n.translate-i18n.configureOptions",
         "title": "Configure Translation Options",
-        "category": "Translate I18n"
+        "category": "Translate i18n"
       }
     ],
     "menus": {
@@ -105,8 +105,8 @@
       ]
     },
     "configuration": {
-      "title": "Translate I18n by l10n.dev",
-      "description": "Settings for the Translate I18n files by l10n.dev extension",
+      "title": "Translate i18n by l10n.dev",
+      "description": "Settings for the Translate i18n files by l10n.dev extension",
       "properties": {
         "l10n-translate-i18n.apiKey": {
           "type": "string",
@@ -123,6 +123,11 @@
           "type": "boolean",
           "default": false,
           "description": "Use shortened forms if translation is longer than source text"
+        },
+        "l10n-translate-i18n.generateGlossary": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, a glossary is generated from your source and translated target content, then saved as the active glossary for this language pair for future translations."
         },
         "l10n-translate-i18n.generatePluralForms": {
           "type": "boolean",
@@ -173,6 +178,6 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "ai-l10n-sdk": "^1.5.1"
+    "ai-l10n-sdk": "^1.6.2"
   }
 }

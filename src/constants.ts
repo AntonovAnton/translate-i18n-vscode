@@ -6,6 +6,7 @@ export const CONFIG = {
     API_KEY: "apiKey",
     USE_CONTRACTIONS: "useContractions",
     USE_SHORTENING: "useShortening",
+    GENERATE_GLOSSARY: "generateGlossary",
     GENERATE_PLURAL_FORMS: "generatePluralForms",
     SAVE_FILTERED_STRINGS: "saveFilteredStrings",
     TRANSLATE_METADATA: "translateMetadata",

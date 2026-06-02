@@ -1,6 +1,14 @@
 # Change Log
 
-All notable changes to the "Translate I18n by l10n.dev" extension will be documented in this file.
+All notable changes to the "Translate i18n by l10n.dev" extension will be documented in this file.
+
+## [1.11.0] - 2026-06-02
+
+### Added
+- **AI Glossary Generation** — New `generateGlossary` option (config: `generateGlossary: true`) that generates a translation glossary from source and target content and saves it as the active glossary for this language pair, improving consistency across future translations.
+
+### Configuration
+- **l10n-translate-i18n.generateGlossary** - When is enabled it automatically builds a glossary with AI.
 
 ## [1.10.2] - 2026-05-05
 

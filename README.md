@@ -1,4 +1,4 @@
-# Translate I18n by l10n.dev
+# Translate i18n by l10n.dev
 
 AI-powered localization in VS Code. Translate i18n localization files in multiple formats directly in your editor using l10n.dev's intelligent translation service.
 
@@ -17,8 +17,9 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 - 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
 - 🌍 **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
 - 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
-- 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding ~16,000 characters can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
+- 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding AI output limit it can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
 - 💰 **Free**: Users get 30,000 characters free monthly.
+- 📚 **Translation Glossary** - Generate and save AI glossaries for consistent terminology across translations.
 
 ## Getting Started
 
@@ -134,15 +135,28 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 
 - **Use Contractions**: Makes translations less formal (default: true)
 - **Use Shortening**: Uses shortened forms if translation is longer than source (default: false)
+- **Generate Glossary**: Generate and save a glossary from source and translated content for this language pair. See [Translation Glossary](#translation-glossary)
 - **Generate Plural Forms**: Generates additional plural form strings (e.g., for i18next) with plural suffixes. Do not enable for strict source-to-target mapping (default: false)
 - **Translate Metadata**: Translate metadata along with UI strings. For example, in Flutter ARB files, metadata entries like `@key` contain descriptions that can also be translated. Enable to translate metadata (default: false)
 
 ## Commands
 
-- `Translate I18n: Set API Key` - Securely configure API Key
-- `Translate I18n: Clear API Key` - Clear API Key in VS Code secrets storage
-- `Translate I18n: Configure Translation Options` - Open extension settings
-- `Translate I18n: Translate to...` - Translate any supported localization file (JSON, ARB, XML, YAML, PO, XLIFF, `.properties`, CSV, TSV, TXT, and more)
+- `Translate i18n: Set API Key` - Securely configure API Key
+- `Translate i18n: Clear API Key` - Clear API Key in VS Code secrets storage
+- `Translate i18n: Configure Translation Options` - Open extension settings
+- `Translate i18n: Translate to...` - Translate any supported localization file (JSON, ARB, XML, YAML, PO, XLIFF, `.properties`, CSV, TSV, TXT, and more)
+
+## Translation Glossary
+
+A translation glossary maps specific source-language terms to approved target-language equivalents, ensuring the AI uses your exact terminology instead of valid-but-unintended synonyms. Glossaries are especially valuable for brand names, legal terms, clinical vocabulary, and product-specific concepts.
+
+### AI Glossary Generation
+
+When **Generate Glossary** is enabled (config) it automatically builds a glossary from the source and translated target content, then save it as the active glossary for this source/target language pair. Once saved, the glossary is applied automatically on all future translations for the same language pair.
+
+> **Note:** When **Generate Glossary** is enabled, your character quota is debited for the full source content upfront — even when you choose translating only new strings. When disabled (default), a temporary internal glossary is generated automatically at no extra cost only for large files that exceed the AI chunk size.
+
+Manage your saved glossaries at [l10n.dev/ws/translation-glossary](https://l10n.dev/ws/translation-glossary).
 
 ## Language Support
 
