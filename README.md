@@ -18,7 +18,7 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 - 🌍 **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
 - 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding AI output limit it can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
-- 💰 **Free**: Users get 30,000 characters free monthly.
+- 💰 **Free**: Users get 10,000 characters free monthly.
 - 📚 **Translation Glossary** - Generate and save AI glossaries for consistent terminology across translations.
 
 ## Getting Started
@@ -167,7 +167,7 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 
 ## Pricing
 
-- **Free Characters**: 30,000 characters for free monthly.
+- **Free Characters**: 10,000 characters for free monthly.
 - **Pay-as-you-go**: Affordable character-based pricing. Visit [l10n.dev/#pricing](https://l10n.dev/#pricing) for current pricing.
 - **No subscription required**
 
