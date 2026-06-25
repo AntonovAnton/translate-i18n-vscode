@@ -9,7 +9,7 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 - 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI. Translate to 165+ languages.
 - 📂 **Multi-Format Support**: Translate localization files in all major formats — JSON/JSONC, ARB (Flutter), XML/PLIST/RESX (Android, iOS, .NET), YAML (Ruby, Node.js), PO/POT (GNU Gettext, WordPress), XLIFF (CAT tools, Angular), Java `.properties`, CSV/TSV, Markdown and plain text files.
 - 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
-- 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, or create a new file with a copy number. Perfect for iterative localization workflows.
+- 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, replace or create a new file with a copy number. Perfect for iterative localization workflows.
 - 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
 - 🛠️ **Developer-Friendly Features**: Preserves placeholders, HTML tags, and formatting while adapting dates and numbers to target locales. Intelligently avoids translating things that shouldn't be translated (proper names, urls, technical terms, etc.). Learn more in this article: [i18n vs l10n: Why Developers Should Care and How AI Can Help](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17).
 - 🔒 **Type Safety**: Preserves JSON data types during translation—numbers remain numbers, booleans stay booleans, and null stay null. AI translates only string content without converting other data types to strings.
@@ -20,6 +20,7 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding AI output limit it can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
 - 💰 **Free**: Users get 10,000 characters free monthly.
 - 📚 **Translation Glossary** - Generate and save AI glossaries for consistent terminology across translations.
+- **Linguistic Instructions** - Control the overall style, tone, and translation behavior.
 
 ## Getting Started
 
@@ -85,7 +86,6 @@ locales/
 - **Detection**: Language code is identified from the folder name (e.g., `en/`, `es/`, `fr/`)
 - **File Saving**: Creates the target language folder if it doesn't exist and saves the file with the same name as the source file
 - **Example**: Translating `locales/en/common.json` to Spanish → `locales/es/common.json`
-- **Conflict Resolution**: If the target file already exists, adds a copy number (e.g., `common (1).json`)
 
 ### File-based Structure
 ```
@@ -110,7 +110,6 @@ l10n/
 - **Detection**: Language code is identified from the filename (e.g., `en.json`, `es.json`, `fr.json`)
 - **File Saving**: Saves the translated file using the target language code as the filename in the same folder
 - **Example**: Translating `i18n/en.json` to Spanish → `i18n/es.json`
-- **Conflict Resolution**: If the target file already exists, adds a copy number (e.g., `es (1).json`)
 
 ### Shopify Theme File-Based Structure
 ```
@@ -124,7 +123,6 @@ theme/locales/
 - **Detection**: Files with `.default.` in the name (e.g., `en.default.schema.json`) are recognized as source files
 - **File Saving**: Target files automatically remove `.default.` while preserving `.schema.` suffix
 - **Example**: Translating `theme/locales/en.default.schema.json` to Spanish → `theme/locales/es-ES.schema.json`
-- **Conflict Resolution**: If the target file already exists, adds a copy number (e.g., `es-ES (1).schema.json`)
 
 ### Unknown Structure Fallback
 For projects that don't match the above patterns, the extension falls back to saving files with the format: `{originalname}.{languagecode}.json` in the same directory as the source file.
@@ -157,6 +155,18 @@ When **Generate Glossary** is enabled (config) it automatically builds a glossar
 > **Note:** When **Generate Glossary** is enabled, your character quota is debited for the full source content upfront — even when you choose translating only new strings. When disabled (default), a temporary internal glossary is generated automatically at no extra cost only for large files that exceed the AI chunk size.
 
 Manage your saved glossaries at [l10n.dev/ws/translation-glossary](https://l10n.dev/ws/translation-glossary).
+
+## Linguistic Instructions
+
+Linguistic Instructions let you guide AI, for example:
+- 📝 "Use formal tone"
+- 📝 "Do not translate product names"
+- 📝 "Use active voice"
+
+Unlike glossaries that control specific terms, Linguistic Instructions control the overall style, tone, and translation behavior.
+Combined with AI Glossaries, they give much more control over localization quality and brand consistency.
+
+Manage your saved linguistic Instructions at [l10n.dev/ws/linguistic-instructions](https://l10n.dev/ws/linguistic-instructions).
 
 ## Language Support
 
