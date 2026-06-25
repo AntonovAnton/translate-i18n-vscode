@@ -2,6 +2,12 @@
 
 All notable changes to the "Translate i18n by l10n.dev" extension will be documented in this file.
 
+## [1.12.0] - 2026-06-25
+
+### Changed
+- **User Experience**: When a target file exists, users are presented with a clear dialog offering three options: "Translate Only New Strings", "Replace Existing File", "Create New File", or "Cancel"
+- When `Translate Only New Strings` is selected, the fileName is used as a scope to determine which strings are considered new/changed. It allows for more granular control over which strings are translated. 
+
 ## [1.11.1] - 2026-06-15
 
 ### Changed

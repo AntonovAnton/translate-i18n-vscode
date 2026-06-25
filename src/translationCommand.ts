@@ -28,10 +28,10 @@ import { CONFIG, VSCODE_COMMANDS } from "./constants";
  * Asks user how to handle existing target files
  * Returns user's choice or undefined if cancelled
  */
-async function askTranslateOnlyNewStringsPreference(
+async function askFileSavingPreference(
   existingFileCount: number,
   fileName?: string,
-): Promise<"update" | "create" | undefined> {
+): Promise<"update" | "create" | "replace" | undefined> {
   const isMultipleFiles = existingFileCount > 1;
   const placeHolder = isMultipleFiles
     ? `${existingFileCount} target file(s) already exist. What would you like to do?`
@@ -45,6 +45,15 @@ async function askTranslateOnlyNewStringsPreference(
           ? "Update existing files with only new translations"
           : "Update existing file with only new translations",
         value: "update" as const,
+      },
+      {
+        label: isMultipleFiles
+          ? "$(pencil) Replace Existing Files"
+          : "$(pencil) Replace Existing File",
+        description: isMultipleFiles
+          ? "Replace all existing files with new translations"
+          : "Replace existing file with new translations",
+        value: "replace" as const,
       },
       {
         label: isMultipleFiles
@@ -144,6 +153,7 @@ export async function handleTranslateCommand(
 
     // Ask user once about translate only new strings preference (if multiple files might exist)
     let translateOnlyNewStrings = false;
+    let replaceExistingFiles = false;
     const targetFilePaths = targetLanguages.map((lang) =>
       i18nProjectManager.generateTargetFilePath(fileUri.fsPath, lang),
     );
@@ -152,7 +162,7 @@ export async function handleTranslateCommand(
     );
 
     if (existingFiles.length > 0) {
-      const choice = await askTranslateOnlyNewStringsPreference(
+      const choice = await askFileSavingPreference(
         existingFiles.length,
         path.basename(existingFiles[0]),
       );
@@ -162,9 +172,15 @@ export async function handleTranslateCommand(
       }
 
       translateOnlyNewStrings = choice === "update";
+      replaceExistingFiles = choice === "replace";
+
       logger.logInfo(
         `User chose to ${
-          choice === "update" ? "update existing files" : "create new files"
+          choice === "update"
+            ? "update existing files"
+            : choice === "create"
+              ? "create new files"
+              : "replace existing files"
         } for ${targetLanguages.length} target language(s)`,
       );
     }
@@ -190,6 +206,7 @@ export async function handleTranslateCommand(
             i18nProjectManager,
             apiKey,
             translateOnlyNewStrings,
+            replaceExistingFiles,
             isArbFile ? FileSchema.ARBFlutter : null,
             format,
           );
@@ -246,6 +263,7 @@ async function performTranslation(
   i18nProjectManager: I18nProjectManager,
   apiKey: string,
   translateOnlyNewStrings: boolean,
+  replaceExistingFiles: boolean,
   schema: FileSchema | null,
   format?: string,
 ): Promise<boolean> {
@@ -262,6 +280,7 @@ async function performTranslation(
 
       // Read file
       const fileContent = fs.readFileSync(sourceFilePath, "utf8");
+      const fileName = path.basename(sourceFilePath);
 
       const config = vscode.workspace.getConfiguration(CONFIG.SECTION);
       const generateGlossary = config.get(CONFIG.KEYS.GENERATE_GLOSSARY, false);
@@ -292,6 +311,7 @@ async function performTranslation(
         targetStrings,
         schema,
         format,
+        scope: fileName, // Use file name as scope for better incremental translation
       };
 
       const result = await translationService.translate(request, apiKey);
@@ -314,7 +334,7 @@ async function performTranslation(
       let outputPath = targetFilePath;
 
       // If not replacing file generate a new path with copy number
-      if (!translateOnlyNewStrings) {
+      if (!translateOnlyNewStrings && !replaceExistingFiles) {
         outputPath = i18nProjectManager.getUniqueFilePath(targetFilePath);
       }
 
