@@ -20,7 +20,8 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 - 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding AI output limit it can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
 - 💰 **Free**: Users get 10,000 characters free monthly.
 - 📚 **Translation Glossary** - Generate and save AI glossaries for consistent terminology across translations.
-- **Linguistic Instructions** - Control the overall style, tone, and translation behavior.
+- 📝 **Linguistic Instructions** - Control the overall style, tone, and translation behavior.
+- **MCP Server** - Turns your coding agent to a localization specialist.
 
 ## Getting Started
 
@@ -40,32 +41,6 @@ AI-powered localization in VS Code. Translate i18n localization files in multipl
 4. If target file(s) exist, choose to update existing files or create new ones
 5. Wait for translation to complete
 6. Find your translated files in the appropriate language folders
-
-## Related Project: ai-l10n npm Package
-
-Looking for a programmatic solution? Check out the [**ai-l10n**](https://www.npmjs.com/package/ai-l10n) npm package! This Node.js package provides the same powerful AI translation capabilities directly in your JavaScript/TypeScript projects.
-
-**Why use ai-l10n?**
-
-1. **CI/CD Integration** - Automate translations in your build pipeline or deployment workflows
-2. **Programmatic Control** - Full API access with TypeScript support for custom translation logic and batch processing
-3. **CLI Support** - Command-line interface for quick translations without opening VS Code
-4. **Framework Agnostic** - Use with any Node.js project: React, Vue, Angular, Next.js, Express, or standalone scripts
-5. **Advanced Features** - Access to l10n.dev API
-
-Perfect for developers who want to integrate AI-powered localization into their automated workflows, build tools, or server-side applications.
-
-### ARB File Support (Flutter Localization)
-
-<img src="images/flutter-localization.gif" alt="Flutter Localization in VS Code">
-
-The extension fully supports ARB (Application Resource Bundle) files used in Flutter applications:
-
-- **Automatic Metadata Updates**: The API automatically updates `@@locale` to the target language code and `@@last_modified` to the current UTC timestamp
-- **Metadata Translation Control**: By default, metadata entries (like `@key`) are NOT translated and remain unchanged. Enable the `translateMetadata` setting if you want to translate these metadata (e.g. description, example, context for translators) along with UI strings
-- **Custom Prefixes**: Supports custom file naming patterns (e.g., `app_en_US.arb`, `my_app_fr.arb`)
-- **Underscore Format**: ARB files use underscores instead of hyphens (e.g., `en_US` instead of `en-US`)
-- **Perfect for Flutter**: Seamlessly integrates with Flutter's localization workflow
 
 ## Supported Project Structures
 
@@ -97,35 +72,26 @@ i18n/
 ├── de.json
 └── zh-Hans-CN.json
 ```
-```
-l10n/
-├── app_en.json
-├── app_en_US.json
-├── app_es.json
-├── app_fr.json
-├── app_de.json
-└── app_zh_Hans_CN.json
-```
 **How it works:**
 - **Detection**: Language code is identified from the filename (e.g., `en.json`, `es.json`, `fr.json`)
 - **File Saving**: Saves the translated file using the target language code as the filename in the same folder
 - **Example**: Translating `i18n/en.json` to Spanish → `i18n/es.json`
 
-### Shopify Theme File-Based Structure
-```
-theme/locales/
-├── en.default.schema.json  # Source file
-├── es-ES.schema.json       # Auto-detected
-├── fr.schema.json          # Auto-detected
-└── de.schema.json          # Auto-detected
-```
-**How it works:**
-- **Detection**: Files with `.default.` in the name (e.g., `en.default.schema.json`) are recognized as source files
-- **File Saving**: Target files automatically remove `.default.` while preserving `.schema.` suffix
-- **Example**: Translating `theme/locales/en.default.schema.json` to Spanish → `theme/locales/es-ES.schema.json`
-
 ### Unknown Structure Fallback
 For projects that don't match the above patterns, the extension falls back to saving files with the format: `{originalname}.{languagecode}.json` in the same directory as the source file.
+
+
+### ARB File Support (Flutter Localization)
+
+<img src="images/flutter-localization.gif" alt="Flutter Localization in VS Code">
+
+The extension fully supports ARB (Application Resource Bundle) files used in Flutter applications:
+
+- **Automatic Metadata Updates**: The API automatically updates `@@locale` to the target language code and `@@last_modified` to the current UTC timestamp
+- **Metadata Translation Control**: By default, metadata entries (like `@key`) are NOT translated and remain unchanged. Enable the `translateMetadata` setting if you want to translate these metadata (e.g. description, example, context for translators) along with UI strings
+- **Custom Prefixes**: Supports custom file naming patterns (e.g., `app_en_US.arb`, `my_app_fr.arb`)
+- **Underscore Format**: ARB files use underscores instead of hyphens (e.g., `en_US` instead of `en-US`)
+- **Perfect for Flutter**: Seamlessly integrates with Flutter's localization workflow
 
 ## Configuration Options
 
@@ -167,6 +133,24 @@ Unlike glossaries that control specific terms, Linguistic Instructions control t
 Combined with AI Glossaries, they give much more control over localization quality and brand consistency.
 
 Manage your saved linguistic Instructions at [l10n.dev/ws/linguistic-instructions](https://l10n.dev/ws/linguistic-instructions).
+
+## Related Project: ai-l10n npm Package
+
+Looking for a programmatic solution? Check out the [**ai-l10n**](https://www.npmjs.com/package/ai-l10n) npm package! This Node.js package provides the same powerful AI translation capabilities directly in your JavaScript/TypeScript projects.
+
+**Why use ai-l10n?**
+
+1. **CI/CD Integration** - Automate translations in your build pipeline or deployment workflows
+2. **Programmatic Control** - Full API access with TypeScript support for custom translation logic and batch processing
+3. **CLI Support** - Command-line interface for quick translations without opening VS Code
+4. **Framework Agnostic** - Use with any Node.js project: React, Vue, Angular, Next.js, Express, or standalone scripts
+5. **Advanced Features** - Access to l10n.dev API
+
+Perfect for developers who want to integrate AI-powered localization into their automated workflows, build tools, or server-side applications.
+
+### For AI Agents (MCP Server)
+
+Turn your coding agent into a localization specialist. Add our ai-l10n MCP server to GitHub Copilot, Cursor, Claude, Codex, or Windsurf and let your agent translate i18n files without dumping unnecessary data to its context. See [AI Localization Agent Setup Guide](https://l10n.dev/help/ai-localization-agent)
 
 ## Language Support
 

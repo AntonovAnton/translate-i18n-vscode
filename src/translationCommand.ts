@@ -435,7 +435,16 @@ async function showTranslationSuccess(
 ) {
   const charsUsed = result.usage.charsUsed || 0;
   const remainingBalance = currentBalance || 0;
-  let message = `✅ Translation completed! Used ${charsUsed.toLocaleString()} characters.`;
+  let message = `✅ Translation completed! Used ${charsUsed.toLocaleString()} characters`;
+
+  const contentChars = result.usage.details.sourceStringsCharCount || 0;
+  const glossaryChars = result.usage.details.glossaryCharCount || 0;
+  const instructionsChars = result.usage.details.instructionCharCount || 0;
+  if (charsUsed > contentChars) {
+    message += ` (content: ${contentChars.toLocaleString()}, glossary: ${glossaryChars.toLocaleString()}, instruction: ${instructionsChars.toLocaleString()}).`;
+  } else {
+    message += `.`;
+  }
   if (charsUsed > 0) {
     message += ` Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
       targetFilePath,

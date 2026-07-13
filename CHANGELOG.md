@@ -2,6 +2,10 @@
 
 All notable changes to the "Translate i18n by l10n.dev" extension will be documented in this file.
 
+## [1.12.1] — 2026-07-13
+
+- Usage details are added to the Translation complete notification
+
 ## [1.12.0] - 2026-06-25
 
 ### Changed
