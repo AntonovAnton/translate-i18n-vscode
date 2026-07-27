@@ -1,8 +1,12 @@
 .vscode/**
 .vscode-test/**
+.vs/**
+.claude/**
+.github/**
 out/**
 node_modules/**
 src/**
+**/*.vsix
 .gitignore
 .yarnrc
 esbuild.js

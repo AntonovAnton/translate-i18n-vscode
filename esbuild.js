@@ -42,11 +42,30 @@ async function main() {
 			esbuildProblemMatcherPlugin,
 		],
 	});
+
+	// The ai-l10n MCP server is shipped inside the VSIX so it runs offline and stays
+	// pinned to this extension release. It is a standalone stdio process launched by
+	// VS Code, so it is bundled separately from the extension host code.
+	const mcpCtx = await esbuild.context({
+		entryPoints: [
+			'node_modules/ai-l10n-mcp/dist/index.js'
+		],
+		bundle: true,
+		format: 'cjs',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'node',
+		target: 'node18',
+		outfile: 'dist/mcp-server.js',
+		logLevel: 'silent',
+	});
+
 	if (watch) {
-		await ctx.watch();
+		await Promise.all([ctx.watch(), mcpCtx.watch()]);
 	} else {
-		await ctx.rebuild();
-		await ctx.dispose();
+		await Promise.all([ctx.rebuild(), mcpCtx.rebuild()]);
+		await Promise.all([ctx.dispose(), mcpCtx.dispose()]);
 	}
 }
 

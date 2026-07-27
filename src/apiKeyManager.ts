@@ -1,13 +1,28 @@
 import * as vscode from "vscode";
 import { CONFIG } from "./constants";
-import { ILogger, URLS } from "ai-l10n-sdk";
+import {
+  ApiKeyManager as SharedApiKeyManager,
+  ILogger,
+  URLS,
+} from "ai-l10n-sdk";
 
+/**
+ * Owns the API Key for the extension.
+ *
+ * One rule: we find a key wherever it lives, but we only ever write to VS Code's
+ * secret storage. The ai-l10n CLI and the bundled MCP server keep their own key in
+ * ~/.ai-l10n/config.json; that store is read as a fallback so a key configured
+ * outside VS Code keeps working, and is never written to from here.
+ */
 export class ApiKeyManager {
   private readonly SECRET_KEY = `${CONFIG.SECTION}.${CONFIG.KEYS.API_KEY}`;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
-    private readonly logger: ILogger
+    private readonly logger: ILogger,
+    private readonly sharedApiKeyManager: SharedApiKeyManager = new SharedApiKeyManager(
+      logger
+    )
   ) {}
 
   async getApiKey(): Promise<string | undefined> {
@@ -49,10 +64,22 @@ export class ApiKeyManager {
       return configApiKey;
     }
 
-    if (!secureApiKey) {
-      this.logger.logInfo("No API Key found");
+    if (secureApiKey) {
+      return secureApiKey;
     }
-    return secureApiKey;
+
+    // Fall back to the key shared with the ai-l10n CLI and the MCP server, so a key
+    // set outside VS Code (or by an agent via l10n_set_api_key) still works here.
+    const sharedApiKey = await this.sharedApiKeyManager.getStoredApiKey();
+    if (sharedApiKey) {
+      this.logger.logInfo(
+        "Using the API Key shared with the ai-l10n CLI and MCP server"
+      );
+      return sharedApiKey;
+    }
+
+    this.logger.logInfo("No API Key found");
+    return undefined;
   }
 
   /**
@@ -99,6 +126,28 @@ export class ApiKeyManager {
         undefined,
         vscode.ConfigurationTarget.Global
       );
+
+    // The CLI and the MCP server read their own key from ~/.ai-l10n/config.json.
+    // Clearing only VS Code's copy would leave them translating with a key the user
+    // believes is gone, so offer to remove that one too. It is shared with tools
+    // outside VS Code, hence the confirmation rather than a silent delete.
+    const sharedApiKey = await this.sharedApiKeyManager.getStoredApiKey();
+    if (sharedApiKey) {
+      const action = await vscode.window.showWarningMessage(
+        "An API Key is also stored for the ai-l10n CLI and MCP server (~/.ai-l10n/config.json). Remove that one too?",
+        "Remove",
+        "Keep"
+      );
+
+      if (action === "Remove") {
+        await this.sharedApiKeyManager.clearStoredApiKey();
+        this.logger.logInfo("Shared API Key cleared from ~/.ai-l10n/config.json");
+      } else {
+        this.logger.logInfo(
+          "Shared API Key in ~/.ai-l10n/config.json was kept at the user's request"
+        );
+      }
+    }
 
     this.logger.logInfo(
       "API Key cleared successfully from all storage locations"

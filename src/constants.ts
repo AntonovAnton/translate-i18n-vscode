@@ -10,7 +10,17 @@ export const CONFIG = {
     GENERATE_PLURAL_FORMS: "generatePluralForms",
     SAVE_FILTERED_STRINGS: "saveFilteredStrings",
     TRANSLATE_METADATA: "translateMetadata",
+    ENABLE_MCP_SERVER: "enableMcpServer",
   },
+} as const;
+
+// Built-in MCP server that ships inside the extension
+export const MCP = {
+  // Must match contributes.mcpServerDefinitionProviders[0].id in package.json
+  PROVIDER_ID: "l10nDevMcpProvider",
+  SERVER_LABEL: "l10n.dev",
+  SERVER_SCRIPT: "dist/mcp-server.js",
+  API_KEY_ENV: "L10N_API_KEY",
 } as const;
 
 // State keys for extension storage

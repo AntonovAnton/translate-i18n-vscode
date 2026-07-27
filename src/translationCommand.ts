@@ -439,14 +439,12 @@ async function showTranslationSuccess(
 
   const contentChars = result.usage.details.sourceStringsCharCount || 0;
   const glossaryChars = result.usage.details.glossaryCharCount || 0;
-  const instructionsChars = result.usage.details.instructionCharCount || 0;
+  const instructionChars = result.usage.details.instructionCharCount || 0;
   if (charsUsed > contentChars) {
-    message += ` (content: ${contentChars.toLocaleString()}, glossary: ${glossaryChars.toLocaleString()}, instruction: ${instructionsChars.toLocaleString()}).`;
-  } else {
-    message += `.`;
+    message += ` (content: ${contentChars.toLocaleString()}, glossary: ${glossaryChars.toLocaleString()}, instruction: ${instructionChars.toLocaleString()})`;
   }
   if (charsUsed > 0) {
-    message += ` Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
+    message += `. Remaining: ${remainingBalance.toLocaleString()} characters. File saved as ${path.basename(
       targetFilePath,
     )}`;
   }

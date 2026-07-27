@@ -1,27 +1,39 @@
 # Translate i18n by l10n.dev
 
-AI-powered localization in VS Code. Translate i18n localization files in multiple formats directly in your editor using l10n.dev's intelligent translation service.
+AI-powered localization in VS Code. [Translate i18n](https://l10n.dev/ws/translate-i18n-files) localization files in multiple formats directly in your editor using l10n.dev's intelligent translation service.
 
 <img src="images/demonstration-dark.gif" alt="One click localization in VS Code">
 
 ## Features
 
-- 🤖 **AI-Powered Translation**: Context-aware translations using advanced AI. Translate to 165+ languages.
-- 📂 **Multi-Format Support**: Translate localization files in all major formats — JSON/JSONC, ARB (Flutter), XML/PLIST/RESX (Android, iOS, .NET), YAML (Ruby, Node.js), PO/POT (GNU Gettext, WordPress), XLIFF (CAT tools, Angular), Java `.properties`, CSV/TSV, Markdown and plain text files.
-- 🔧 **Customizable Translation Style**: Configure translations to use contractions (e.g., "don't" vs "do not"), enable shortening when translations exceed source text length, and generate plural forms for i18next compatibility.
-- 🔄 **Translate Only New Strings**: When a target file already exists, choose to translate only new strings and update the existing file, replace or create a new file with a copy number. Perfect for iterative localization workflows.
-- 🌐 **i18next Plural Forms Support**: Automatically generates all required plural form strings with correct plural suffixes when enabled—ideal for i18next projects. For languages with complex pluralization rules (like Russian, Arabic, or Polish), the extension ensures every necessary form is created, even if your source file only has `_one` or `_other`. This guarantees your app works correctly in every locale, with no missing or incorrect plural forms.
-- 🛠️ **Developer-Friendly Features**: Preserves placeholders, HTML tags, and formatting while adapting dates and numbers to target locales. Intelligently avoids translating things that shouldn't be translated (proper names, urls, technical terms, etc.). Learn more in this article: [i18n vs l10n: Why Developers Should Care and How AI Can Help](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17).
-- 🔒 **Type Safety**: Preserves JSON data types during translation—numbers remain numbers, booleans stay booleans, and null stay null. AI translates only string content without converting other data types to strings.
-- 🔐 **Secure API Key Storage**: Your API Keys are stored securely using VS Code's built-in secrets manager.
-- 🎯 **Smart Language Detection**: Automatically detects target languages from your project structure for seamless file organization.
-- 🌍 **Translate to All Languages**: Translate your file to all detected languages at once with a single command.
-- 🧩 **Source Text as Keys**: Supports projects using source text as translation keys.
-- 🕵️ **Smart Error Detection & Chunking**: Automatically detects and retries translations if placeholders or formatting are lost by the AI. For large files, l10n.dev splits content into manageable chunks, maintaining links and context between segments. This prevents issues common with direct uploads to AI models (like Claude or GPT), where exceeding AI output limit it can cause the model to omit, merge, or shorten content—resulting in lost context and lower translation quality. l10n.dev's approach ensures high-quality, accurate translations even for large i18n files.
-- 💰 **Free**: Users get 10,000 characters free monthly.
-- 📚 **Translation Glossary** - Generate and save AI glossaries for consistent terminology across translations.
-- 📝 **Linguistic Instructions** - Control the overall style, tone, and translation behavior.
-- **MCP Server** - Turns your coding agent to a localization specialist.
+### 🌍 Translate
+
+- **165 languages** — context-aware AI translation, one right-click away in the Explorer or editor.
+- **Every major format** — JSON/JSONC, ARB (Flutter), XML/PLIST/RESX/STRINGS (Android, iOS, .NET), YAML (Ruby, Node.js), PO/POT (Gettext, WordPress), XLIFF (Angular, CAT tools), Java `.properties`, CSV/TSV, Markdown, plain text.
+- **All languages at once** — send a file to every language your project already has, in a single command.
+- **Only what changed** — when a target file exists, translate just the new strings and update it in place, replace it, or save a numbered copy.
+
+### 🛠️ Built for i18n, not generic translation
+
+- **Nothing breaks** — placeholders, HTML tags and formatting are preserved, while dates and numbers adapt to the target locale. [Why this matters](https://medium.com/@AntonAntonov88/i18n-vs-l10n-why-developers-should-care-and-how-ai-can-help-fec7a7580d17)
+- **Nothing over-translated** — proper names, URLs and technical terms are left alone.
+- **Types survive** — numbers stay numbers, booleans stay booleans, `null` stays `null`. Only string content is translated.
+- **Correct plurals** — generates every plural form a language actually needs (Russian, Arabic, Polish…), even when your source has only `_one` and `_other`. Ideal for i18next.
+- **Large files stay intact** — content is split into linked chunks that carry context across them, and translations are retried if a placeholder goes missing. Pasting a big file into a chat model instead tends to silently drop, merge or shorten entries.
+- **Source text as keys** — works with projects that use the source string itself as the key.
+
+### 🎛️ Control the output
+
+- **[Glossary](#translation-glossary)** — pin your terminology so the AI uses your exact wording, not a valid-but-wrong synonym.
+- **[Linguistic instructions](#linguistic-instructions)** — steer overall tone and style: "use formal tone", "don't translate product names".
+- **Style switches** — contractions on or off, and shortening when a translation runs longer than the source.
+
+### ⚡ Fits your workflow
+
+- **Knows your layout** — detects target languages from folder-based (`locales/en/`) or file-based (`en.json`) structures and writes files where they belong.
+- **[Built-in MCP server](#for-ai-agents-mcp-server)** — turns your coding agent into a localization specialist. Ships with the extension and reuses the API Key you already set.
+- **Secure by default** — your API Key lives in VS Code's encrypted secrets storage, never in a config file.
+- **Free to start** — 10,000 characters every month, no subscription.
 
 ## Getting Started
 
@@ -102,6 +114,7 @@ Configure translation behavior in VS Code settings (`Ctrl+,` and search for "l10
 - **Generate Glossary**: Generate and save a glossary from source and translated content for this language pair. See [Translation Glossary](#translation-glossary)
 - **Generate Plural Forms**: Generates additional plural form strings (e.g., for i18next) with plural suffixes. Do not enable for strict source-to-target mapping (default: false)
 - **Translate Metadata**: Translate metadata along with UI strings. For example, in Flutter ARB files, metadata entries like `@key` contain descriptions that can also be translated. Enable to translate metadata (default: false)
+- **Enable MCP Server**: Offer the built-in l10n.dev MCP server to Chat, using the API Key stored by this extension (default: true). See [For AI Agents (MCP Server)](#for-ai-agents-mcp-server)
 
 ## Commands
 
@@ -148,9 +161,26 @@ Looking for a programmatic solution? Check out the [**ai-l10n**](https://www.npm
 
 Perfect for developers who want to integrate AI-powered localization into their automated workflows, build tools, or server-side applications.
 
-### For AI Agents (MCP Server)
+## For AI Agents (MCP Server)
 
-Turn your coding agent into a localization specialist. Add our ai-l10n MCP server to GitHub Copilot, Cursor, Claude, Codex, or Windsurf and let your agent translate i18n files without dumping unnecessary data to its context. See [AI Localization Agent Setup Guide](https://l10n.dev/help/ai-localization-agent)
+Turn your coding agent into a localization specialist. The agent translates i18n files without dumping their contents into its context — the files are translated server-side, so you save tokens and the agent stays focused on coding.
+
+### In VS Code — already built in
+
+The [ai-l10n MCP server](https://www.npmjs.com/package/ai-l10n-mcp) ships with this extension. There is nothing to install and no `mcp.json` to edit: open Chat in agent mode and the **l10n.dev** server is already available. Your API Key is passed to the server from VS Code's secrets manager when it starts, so it never ends up in a config file.
+
+Available tools:
+
+- **Translation**: `l10n_translate_file`, `l10n_detect_project_structure`
+- **Glossaries**: list, get, create, update, delete glossaries and entries
+- **Linguistic instructions**: list, create, update, delete
+- **Account**: `l10n_get_balance`, `l10n_get_api_key_status`
+
+Set the API Key once with `l10n.dev: Set API Key` and the server picks it up. If you already configured a key outside VS Code (via the `ai-l10n` CLI or another agent), that one keeps working too. To turn the built-in server off — for example if you prefer your own `mcp.json` entry — disable **Enable MCP Server** in settings.
+
+### In other agents
+
+The same server works with Cursor, Claude, Codex, and Windsurf via `npx -y ai-l10n-mcp`. See the [AI Localization Agent Setup Guide](https://l10n.dev/help/ai-localization-agent) for per-agent configuration.
 
 ## Language Support
 
@@ -184,6 +214,11 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 **"Invalid JSON file"**
 - Ensure your JSON file is valid
 - Check for syntax errors using VS Code's built-in JSON validation
+
+**MCP server shows an error in Chat**
+- Run `MCP: List Servers` from the Command Palette, select **l10n.dev**, then **Show Output** to see the server log
+- If the tools report a missing API Key, run `l10n.dev: Set API Key` and restart the server — or ask your agent to run `l10n_get_api_key_status`
+- Seeing the l10n tools twice? You likely also have `ai-l10n-mcp` in your own `mcp.json` — turn off the **Enable MCP Server** setting or remove your manual entry
 
 ### Important: Working with Arrays in JSON
 

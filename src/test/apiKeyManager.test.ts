@@ -9,6 +9,7 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
   let mockSecrets: any;
   let mockConfiguration: any;
   let mockLogger: ILogger;
+  let mockSharedApiKeyManager: any;
   let apiKeyManager: ApiKeyManager;
 
   setup(() => {
@@ -33,16 +34,28 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
       showAndLogError: sinon.stub(),
     };
 
+    // Mock the key store shared with the ai-l10n CLI and the MCP server.
+    // Injected so tests never touch the real ~/.ai-l10n/config.json.
+    mockSharedApiKeyManager = {
+      getStoredApiKey: sinon.stub().resolves(undefined),
+      clearStoredApiKey: sinon.stub().resolves(),
+    };
+
     // Mock VS Code workspace API
     sinon.stub(vscode.workspace, "getConfiguration").returns(mockConfiguration);
     sinon.stub(vscode.window, "showInformationMessage");
+    sinon.stub(vscode.window, "showWarningMessage");
 
     // Mock extension context
     mockContext = {
       secrets: mockSecrets,
     };
 
-    apiKeyManager = new ApiKeyManager(mockContext, mockLogger);
+    apiKeyManager = new ApiKeyManager(
+      mockContext,
+      mockLogger,
+      mockSharedApiKeyManager
+    );
   });
 
   teardown(() => {
@@ -132,6 +145,84 @@ suite("ApiKeyManager Configuration Migration Tests", () => {
 
     // Assert
     assert.strictEqual(result, undefined);
+  });
+
+  test("falls back to the key shared with the CLI and MCP server", async () => {
+    // Arrange: nothing in VS Code, but a key was set via the CLI or an agent
+    const sharedApiKey = "key-from-ai-l10n-config";
+    mockSecrets.get.resolves(undefined);
+    mockConfiguration.get.withArgs("apiKey").returns(undefined);
+    mockSharedApiKeyManager.getStoredApiKey.resolves(sharedApiKey);
+
+    // Act
+    const result = await apiKeyManager.getApiKey();
+
+    // Assert
+    assert.strictEqual(result, sharedApiKey);
+  });
+
+  test("prefers secure storage over the shared key store", async () => {
+    // Arrange
+    mockSecrets.get.resolves("key-from-vscode-secrets");
+    mockSharedApiKeyManager.getStoredApiKey.resolves("key-from-ai-l10n-config");
+
+    // Act
+    const result = await apiKeyManager.getApiKey();
+
+    // Assert
+    assert.strictEqual(result, "key-from-vscode-secrets");
+    assert.ok(
+      mockSharedApiKeyManager.getStoredApiKey.notCalled,
+      "the shared store is only a fallback"
+    );
+  });
+
+  test("setApiKey never writes to the shared key store", async () => {
+    // Arrange
+    sinon.stub(vscode.window, "showInputBox").resolves("brand-new-key");
+    mockSecrets.store.resolves();
+
+    // Act
+    await apiKeyManager.setApiKey();
+
+    // Assert
+    assert.ok(
+      mockSecrets.store.calledWith("l10n-translate-i18n.apiKey", "brand-new-key")
+    );
+    assert.strictEqual(
+      mockSharedApiKeyManager.storeApiKey,
+      undefined,
+      "the shared store must never be written to from the extension"
+    );
+  });
+
+  test("clearApiKey offers to clear the shared key store too", async () => {
+    // Arrange
+    mockSecrets.delete = sinon.stub().resolves();
+    mockConfiguration.update.resolves();
+    mockSharedApiKeyManager.getStoredApiKey.resolves("key-from-ai-l10n-config");
+    (vscode.window.showWarningMessage as sinon.SinonStub).resolves("Remove");
+
+    // Act
+    await apiKeyManager.clearApiKey();
+
+    // Assert
+    assert.ok(mockSharedApiKeyManager.clearStoredApiKey.calledOnce);
+  });
+
+  test("clearApiKey keeps the shared key when the user declines", async () => {
+    // Arrange
+    mockSecrets.delete = sinon.stub().resolves();
+    mockConfiguration.update.resolves();
+    mockSharedApiKeyManager.getStoredApiKey.resolves("key-from-ai-l10n-config");
+    (vscode.window.showWarningMessage as sinon.SinonStub).resolves("Keep");
+
+    // Act
+    await apiKeyManager.clearApiKey();
+
+    // Assert
+    assert.ok(mockSharedApiKeyManager.clearStoredApiKey.notCalled);
+    assert.ok(mockSecrets.delete.called, "VS Code's own copy is still cleared");
   });
 
   test("clearApiKey removes key from both storages", async () => {
