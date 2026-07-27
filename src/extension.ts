@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { ApiKeyManager } from "./apiKeyManager";
 import { I18nProjectManager, L10nTranslationService, URLS } from "ai-l10n-sdk";
 import { LanguageSelector } from "./languageSelector";
+import { registerMcpServerProvider } from "./mcpServerProvider";
 import { handleTranslateCommand } from "./translationCommand";
 
 import { COMMANDS, VSCODE_COMMANDS, STATE_KEYS, CONFIG } from "./constants";
@@ -26,6 +27,23 @@ export function activate(context: vscode.ExtensionContext) {
   // Setup welcome message for new users
   setupWelcomeMessage(context);
 
+  // Registered before activate() resolves so the editor can cache the server list
+  const mcpServer = registerMcpServerProvider(context, apiKeyManager, logger);
+  context.subscriptions.push(mcpServer.disposable);
+
+  // Re-publish the server when the user turns it on or off
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (
+        event.affectsConfiguration(
+          `${CONFIG.SECTION}.${CONFIG.KEYS.ENABLE_MCP_SERVER}`,
+        )
+      ) {
+        mcpServer.refresh();
+      }
+    }),
+  );
+
   registerCommands(
     context,
     apiKeyManager,
@@ -33,6 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
     translationService,
     i18nProjectManager,
     languageSelector,
+    mcpServer.refresh,
   );
 }
 
@@ -71,12 +90,15 @@ function registerCommands(
   translationService: L10nTranslationService,
   i18nProjectManager: I18nProjectManager,
   languageSelector: LanguageSelector,
+  refreshMcpServer: () => void,
 ) {
   // Register set API Key command
   const setApiKeyDisposable = vscode.commands.registerCommand(
     COMMANDS.SET_API_KEY,
     async () => {
       await apiKeyManager.setApiKey();
+      // The MCP server receives the key on start, so it needs to pick up the new one
+      refreshMcpServer();
     },
   );
 
@@ -92,6 +114,7 @@ function registerCommands(
 
       if (action === "Clear API Key") {
         await apiKeyManager.clearApiKey();
+        refreshMcpServer();
       }
     },
   );

@@ -2,7 +2,7 @@
   "name": "translate-i18n-json",
   "displayName": "Translate i18n by l10n.dev",
   "description": "Translate i18n localization files (JSON, ARB, XML, YAML, PO, XLIFF, MD and more) with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
@@ -40,7 +40,9 @@
     "xliff",
     "yaml",
     "properties",
-    "xml"
+    "xml",
+    "mcp",
+    "copilot"
   ],
   "engines": {
     "vscode": "^1.102.0"
@@ -66,6 +68,12 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "l10nDevMcpProvider",
+        "label": "l10n.dev Localization"
+      }
+    ],
     "commands": [
       {
         "command": "l10n.translate-i18n.translate",
@@ -143,6 +151,11 @@
           "type": "boolean",
           "default": false,
           "description": "Translate metadata along with UI strings. For example, in Flutter ARB files, metadata entries like @key contain descriptions that can also be translated. Enable to translate metadata in target files."
+        },
+        "l10n-translate-i18n.enableMcpServer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Provide the built-in l10n.dev MCP server to Chat, using the API Key stored by this extension. Disable if you prefer to configure ai-l10n-mcp manually in mcp.json."
         }
       }
     }
@@ -178,6 +191,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "ai-l10n-mcp": "^1.1.2",
     "ai-l10n-sdk": "^1.10.0"
   }
 }

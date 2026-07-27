@@ -2,6 +2,21 @@
 
 All notable changes to the "Translate i18n by l10n.dev" extension will be documented in this file.
 
+## [1.13.0] — 2026-07-27
+
+### Added
+- 🤖 **Built-in MCP Server**: The [ai-l10n MCP server](https://www.npmjs.com/package/ai-l10n-mcp) now ships with the extension and is offered to Chat automatically — no `mcp.json` editing required. Open Chat in agent mode and the `l10n.dev` server is already there with the `l10n_*` tools (translate files, detect project structure, manage glossaries and linguistic instructions, check balance).
+- 🔐 **No API Key in config files**: The key stored in VS Code's secrets manager is injected into the server process as `L10N_API_KEY` when it starts, so it never lands in a JSON file. If you haven't set one in the extension, the server falls back to its own stored key (`~/.ai-l10n/config.json`) or its `l10n_set_api_key` tool, exactly as it does outside VS Code.
+
+### Configuration
+- **l10n-translate-i18n.enableMcpServer**: Provide the built-in MCP server to Chat (default: true). Disable it if you configure `ai-l10n-mcp` manually in `mcp.json`.
+
+### Technical Details
+- Contributes `mcpServerDefinitionProviders` (id `l10nDevMcpProvider`) and registers it via `vscode.lm.registerMcpServerDefinitionProvider` during activation
+- `ai-l10n-mcp` v1.1.2 is bundled into `dist/mcp-server.js` and launched with the editor's own Node runtime — works offline, and Node/npx are not required on your PATH
+- The server list refreshes automatically when the API Key or the `enableMcpServer` setting changes — no window reload needed
+- Note: because the extension contributes an MCP provider, VS Code may now activate it when discovering MCP servers, not only when a localization file is opened
+
 ## [1.12.1] — 2026-07-13
 
 - Usage details are added to the Translation complete notification
