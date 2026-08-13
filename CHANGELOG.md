@@ -2,6 +2,22 @@
 
 All notable changes to the "Translate i18n by l10n.dev" extension will be documented in this file.
 
+## [1.14.0] — 2026-08-13
+
+### Added
+- 🔍 **Language codes inside file names are detected**: projects that keep the language code next to other parts of the file name — `emails.en.json`, `emails-en.json`, `en-US.common.json`, `common.en-Latn-US.yml`, `messages_en_US.properties` — are now recognized as file-based structures. Previously they resolved to an unknown structure, so no target languages were offered and translation failed with *"No target languages found"*.
+  - Sibling files following the same pattern become the detected target languages: `emails.en.json` next to `emails.es.json` and `emails.fr.json` offers `es` and `fr`, while `common.de.json` is ignored.
+  - Target files replace the code instead of appending it: `email.en.json` → Russian is saved as `email.ru-RU.json` (previously `email.en.ru-RU.json`), and the separator style is preserved, so `messages_en_US.properties` → `messages_ru_RU.properties`.
+  - Detection only runs after the folder-based and file-based checks fail, and every subtag is validated against the bundled ISO code sets, so names like `strings.min.json` or `config.dev.json` are left alone.
+- 🤖 **MCP server**: `l10n_detect_project_structure` reports these projects as `file-based` with the detected file name pattern (e.g. `emails.{language}.json`), and both `l10n_detect_project_structure` and `l10n_translate_file` accept a `languageCodeRegex` input for naming conventions that are not detected automatically. `l10n_setup_automation` writes that regex into the generated `ai-l10n.config.json` when the project needs it.
+
+### Changed
+- When the whole file name parses as a language code only by coincidence, an embedded code now wins: `app-en.json` is read as `en` with the prefix `app-` (producing `app-fr.json`) instead of as the language `app-en` (which produced `fr.json` and dropped the prefix). Whole-name codes whose subtags are not in the bundled ISO sets, such as `bal-PK.json`, keep their previous interpretation.
+
+### Technical Details
+- Updated [ai-l10n-sdk](https://www.npmjs.com/package/ai-l10n-sdk) to v1.12.0 and the bundled [ai-l10n-mcp](https://www.npmjs.com/package/ai-l10n-mcp) server to v1.2.0
+- Development dependencies (TypeScript, ESLint, typescript-eslint, esbuild, sinon) updated to their latest compatible versions
+
 ## [1.13.0] — 2026-07-27
 
 ### Added
