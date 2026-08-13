@@ -30,7 +30,7 @@ AI-powered localization in VS Code. [Translate i18n](https://l10n.dev/ws/transla
 
 ### ⚡ Fits your workflow
 
-- **Knows your layout** — detects target languages from folder-based (`locales/en/`) or file-based (`en.json`) structures and writes files where they belong.
+- **Knows your layout** — detects target languages from folder-based (`locales/en/`), file-based (`en.json`) and embedded-code (`emails.en.json`, `messages_en_US.properties`) structures and writes files where they belong.
 - **[Built-in MCP server](#for-ai-agents-mcp-server)** — turns your coding agent into a localization specialist. Ships with the extension and reuses the API Key you already set.
 - **Secure by default** — your API Key lives in VS Code's encrypted secrets storage, never in a config file.
 - **Free to start** — 10,000 characters every month, no subscription.
@@ -89,8 +89,26 @@ i18n/
 - **File Saving**: Saves the translated file using the target language code as the filename in the same folder
 - **Example**: Translating `i18n/en.json` to Spanish → `i18n/es.json`
 
+### Language Code Inside the File Name
+```
+locales/
+├── emails.en.json
+├── emails.es.json
+├── emails.fr.json
+├── common.en-US.json
+└── messages_en_US.properties
+```
+The language code doesn't have to be the whole file name — it can sit next to other parts of it, before or after, separated by `.`, `-` or `_`: `emails.en.json`, `emails-en.json`, `en-US.common.json`, `common.en-Latn-US.yml`, `messages_en_US.properties`, `app_en_US.arb`.
+
+**How it works:**
+- **Detection**: The language code is located inside the file name, and files sharing the same naming pattern become the detected target languages — `emails.en.json` next to `emails.es.json` and `emails.fr.json` detects `es` and `fr`, while `common.de.json` is ignored
+- **File Saving**: The code is replaced, not appended, and the separator style of the source name is preserved — `emails.en.json` → French becomes `emails.fr.json`, and `messages_en_US.properties` → Russian becomes `messages_ru_RU.properties`
+- **Example**: Translating `locales/emails.en.json` to Spanish → `locales/emails.es.json`
+
+> Every subtag is validated against ISO language, script and region codes, so ordinary file names such as `strings.min.json` or `config.dev.json` are never mistaken for a language.
+
 ### Unknown Structure Fallback
-For projects that don't match the above patterns, the extension falls back to saving files with the format: `{originalname}.{languagecode}.json` in the same directory as the source file.
+For projects that don't match the above patterns, the extension falls back to saving files with the format: `{originalname}.{languagecode}.{ext}` in the same directory as the source file.
 
 
 ### ARB File Support (Flutter Localization)
@@ -210,6 +228,7 @@ l10n.dev supports 165+ languages with varying proficiency levels:
 **"No languages detected"**
 - The extension will prompt you to enter a language code manually
 - Use BCP-47 format (e.g., "es", "fr", "zh-CN", "en-US")
+- Detection covers language codes in folder names, whole file names and inside file names (see [Supported Project Structures](#supported-project-structures)); a name that doesn't carry a valid code anywhere falls back to manual entry
 
 **"Invalid JSON file"**
 - Ensure your JSON file is valid

@@ -2,7 +2,7 @@
   "name": "translate-i18n-json",
   "displayName": "Translate i18n by l10n.dev",
   "description": "Translate i18n localization files (JSON, ARB, XML, YAML, PO, XLIFF, MD and more) with AI directly inside VS Code using l10n.dev — smart, context-aware localization powered by AI.",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "publisher": "l10n-dev",
   "license": "AGPL-3.0-only",
   "icon": "images/icon.png",
@@ -177,21 +177,21 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/sinon": "^17.0.4",
+    "@types/sinon": "^22.0.0",
     "@types/vscode": "^1.102.0",
-    "@typescript-eslint/eslint-plugin": "^8.39.0",
-    "@typescript-eslint/parser": "^8.39.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
-    "esbuild": "^0.25.8",
-    "eslint": "^9.32.0",
+    "esbuild": "^0.25.12",
+    "eslint": "^9.39.5",
     "mocha": "^10.0.0",
     "npm-run-all": "^4.1.5",
-    "sinon": "^21.0.0",
-    "typescript": "^5.9.2"
+    "sinon": "^21.1.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "ai-l10n-mcp": "^1.1.2",
-    "ai-l10n-sdk": "^1.10.0"
+    "ai-l10n-mcp": "^1.2.0",
+    "ai-l10n-sdk": "^1.12.0"
   }
 }
